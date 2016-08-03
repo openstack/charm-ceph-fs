@@ -1,17 +1,42 @@
-from charms.reactive import when, when_not, set_state
+from charms.reactive import when
 
 from charmhelpers.core.hookenv import (
     config,
-)
+    log, INFO, ERROR)
 
 from charmhelpers.contrib.network.ip import (
     get_address_in_network
 )
 
 @when('ceph.installed')
-@when('ceph-mon.available')
+# @when('ceph-mon.available')
 def setup_mds(mon):
-    
+    log("I'm in setup_mds()")
+    try:
+        from rados import Error as RadosError
+        from ceph_api import ceph_command
+    except ImportError as err:
+        log("rados is not installed yet: {}".format(err))
+        return
+    # TODO: Monitor needs a new CephFS relation
+    # TODO: Update with the conf file location
+    osd = ceph_command.OsdCommand('/etc/ceph/ceph.conf')
+    mds = ceph_command.MdsCommand('/etc/ceph/ceph.conf')
+
+    try:
+        log("Creating cephfs_data pool", level=INFO)
+        # TODO: Update with better pg values
+        osd.osd_pool_create('cephfs_data', 256)
+
+        log("Creating cephfs_metadata pool", level=INFO)
+        # TODO: Update with better pg values
+        osd.osd_pool_create('cephfs_metadata', 256)
+
+        log("Creating ceph fs", level=INFO)
+        mds.mds_newfs(metadata='cephfs_metadata', data='cephfs_data', sure=["--yes-i-really-mean-it"])
+    except RadosError as err:
+        log(message='Error: {}'.format(err.message), level=ERROR)
+
 
 @when('config.changed', 'ceph-mon.available')
 def config_changed():

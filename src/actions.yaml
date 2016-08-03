@@ -1,0 +1,57 @@
+get-quota:
+  description: View quota settings on a directory
+  params:
+    max-files:
+      type: boolean
+      description: |
+        The limit of how many files can be written. Use either this or
+        max-bytes but not both.
+    max-bytes:
+      type: integer
+      description: |
+        The maximum number of bytes that are allowed to be written. Use
+        either this or max-files but not both.
+    directory:
+      type: string
+      description: |
+        The directory to query for quota information.
+  required: [directory]
+  additionalProperties: false
+remove-quota:
+  description: Remove a quota on a directory
+  params:
+    max-files:
+      type: boolean
+      description: |
+        The limit of how many files can be written. Use either this or
+        max-bytes but not both.
+    max-bytes:
+      type: integer
+      description: |
+        The maximum number of bytes that are allowed to be written. Use
+        either this or max-files but not both.
+    directory:
+      type: string
+      description: |
+        The directory to remove the quota from.
+  required: [directory]
+  additionalProperties: false
+set-quota:
+  description: Create a new quota
+  params:
+    max-files:
+      type: integer
+      description: |
+        The limit of how many files can be written. Use either this or
+        max-bytes but not both.
+    max-bytes:
+      type: integer
+      description: |
+        The maximum number of bytes that are allowed to be written. Use
+        either this or max-files but not both.
+    directory:
+      type: string
+      description: |
+        The directory to apply this quota to.
+  required: [directory]
+  additionalProperties: false
