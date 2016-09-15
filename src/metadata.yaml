@@ -1,4 +1,4 @@
-name: charm-ceph-fs
+name: ceph-fs
 summary: Highly scalable distributed storage
 maintainer: OpenStack Charmers <openstack-charmers@lists.ubuntu.com>
 description: |
@@ -9,8 +9,9 @@ tags:
   - storage
   - file-servers
   - misc
+series:
+  - xenial
 subordinate: false
-#provides:
-#requires:
-  #ceph-mon-cephfs:
-    #interface: ceph-mon-cephfs
+requires:
+  ceph-admin:
+    interface: ceph-admin
