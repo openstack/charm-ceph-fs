@@ -13,5 +13,7 @@ series:
   - xenial
 subordinate: false
 requires:
+  ceph-mds:
+    interface: ceph-mds
   ceph-admin:
     interface: ceph-admin
