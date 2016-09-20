@@ -4,8 +4,7 @@ import subprocess
 
 from charms.reactive import when, when_not, set_state
 from charmhelpers.core.hookenv import (
-    config, charm_name,
-    log, INFO, ERROR)
+    config, log, INFO, ERROR)
 from charmhelpers.core.host import service_restart
 from charmhelpers.contrib.storage.linux import ceph
 from charmhelpers.contrib.network.ip import (
@@ -31,11 +30,10 @@ def install_cephfs():
 
 
 @when('cephfs.configured')
-@when('admin_key.saved')
 @when_not('cephfs.started')
 def setup_mds():
     try:
-        name = charm_name()
+        name = socket.gethostname()
         log("Creating cephfs_data pool", level=INFO)
         data_pool = "{}_data".format(name)
         try:
@@ -64,33 +62,27 @@ def setup_mds():
         log(message='Error: {}'.format(err), level=ERROR)
 
 
-@when('ceph-admin.available')
-def handle_admin_key(ceph_client):
-    cephx_key = os.path.join(os.sep,
-                             'etc',
-                             'ceph',
-                             'ceph.client.admin.keyring')
-    try:
-        with open(cephx_key, 'w') as key_file:
-            key_file.write("[client.admin]\n\tkey = {}\n".format(
-                ceph_client.key()
-            ))
-    except IOError as err:
-        log("IOError writing mds-a.keyring: {}".format(err))
-    set_state('admin_key.saved')
-
-
 @when('ceph-mds.available')
 def config_changed(ceph_client):
     charm_ceph_conf = os.path.join(os.sep,
                                    'etc',
                                    'ceph',
                                    'ceph.conf')
-    key_path = os.path.join(os.sep, 'var', 'lib', 'ceph', 'mds', 'ceph-a')
+    key_path = os.path.join(os.sep,
+                            'var',
+                            'lib',
+                            'ceph',
+                            'mds',
+                            'ceph-{}'.format(socket.gethostname())
+                            )
     if not os.path.exists(key_path):
         os.makedirs(key_path)
     cephx_key = os.path.join(key_path,
                              'keyring')
+    admin_key = os.path.join(os.sep,
+                             'etc',
+                             'ceph',
+                             'ceph.client.admin.keyring')
 
     networks = get_networks('ceph-public-network')
     public_network = ', '.join(networks)
@@ -107,7 +99,7 @@ def config_changed(ceph_client):
         'ceph_cluster_network': cluster_network,
         'loglevel': config('loglevel'),
         'hostname': socket.gethostname(),
-        'mds_name': 'a',
+        'mds_name': socket.gethostname(),
     }
 
     try:
@@ -117,8 +109,17 @@ def config_changed(ceph_client):
         log("IOError writing ceph.conf: {}".format(err))
 
     try:
+        with open(admin_key, 'w') as key_file:
+            key_file.write("[client.admin]\n\tkey = {}\n".format(
+                ceph_client.admin_key()
+            ))
+    except IOError as err:
+        log("IOError writing admin.keyring: {}".format(err))
+
+    try:
         with open(cephx_key, 'w') as key_file:
-            key_file.write("[mds.a]\n\tkey = {}\n".format(
+            key_file.write("[mds.{}]\n\tkey = {}\n".format(
+                socket.gethostname(),
                 ceph_client.key()
             ))
     except IOError as err:

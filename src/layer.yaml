@@ -1,2 +1,2 @@
-includes: ['layer:ceph-base', 'interface:/home/chris/repos/juju-interface-ceph-mds', 'interface:/home/chris/repos/juju-interface-ceph-admin']  # if you use any interfaces, add them here
+includes: ['layer:ceph-base', 'interface:/home/chris/repos/juju-interface-ceph-mds']  # if you use any interfaces, add them here
 repo: git@github.com:cholcombe973/charm-ceph-fs.git
