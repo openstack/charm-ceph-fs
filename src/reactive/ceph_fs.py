@@ -4,7 +4,7 @@ import subprocess
 
 from charms.reactive import when, when_not, set_state
 from charmhelpers.core.hookenv import (
-    config, log, INFO, ERROR)
+    config, log, INFO, ERROR, status_set)
 from charmhelpers.core.host import service_restart
 from charmhelpers.contrib.storage.linux import ceph
 from charmhelpers.contrib.network.ip import (
@@ -34,6 +34,7 @@ def install_cephfs():
 def setup_mds():
     try:
         name = socket.gethostname()
+        status_set('maintenance', "Creating cephfs data pool")
         log("Creating cephfs_data pool", level=INFO)
         data_pool = "{}_data".format(name)
         try:
@@ -42,6 +43,7 @@ def setup_mds():
             log("Creating data pool failed!")
             raise err
 
+        status_set('maintenance', "Creating cephfs metadata pool")
         log("Creating cephfs_metadata pool", level=INFO)
         metadata_pool = "{}_metadata".format(name)
         try:
@@ -50,6 +52,7 @@ def setup_mds():
             log("Creating metadata pool failed!")
             raise err
 
+        status_set('maintenance', "Creating cephfs")
         log("Creating ceph fs", level=INFO)
         try:
             subprocess.check_call(["ceph", "fs", "new", name, metadata_pool, data_pool])
