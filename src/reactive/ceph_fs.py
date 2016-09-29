@@ -4,9 +4,8 @@ import subprocess
 
 from charms.reactive import when, when_not, set_state
 from charmhelpers.core.hookenv import (
-    config, log, INFO, ERROR, status_set)
+    config, log, ERROR, service_name)
 from charmhelpers.core.host import service_restart
-from charmhelpers.contrib.storage.linux import ceph
 from charmhelpers.contrib.network.ip import (
     get_address_in_network
 )
@@ -30,35 +29,10 @@ def install_cephfs():
 
 
 @when('cephfs.configured')
+@when('cephfs.pools.created')
 @when_not('cephfs.started')
 def setup_mds():
     try:
-        name = socket.gethostname()
-        status_set('maintenance', "Creating cephfs data pool")
-        log("Creating cephfs_data pool", level=INFO)
-        data_pool = "{}_data".format(name)
-        try:
-            ceph.ReplicatedPool(name=data_pool, service='admin').create()
-        except subprocess.CalledProcessError as err:
-            log("Creating data pool failed!")
-            raise err
-
-        status_set('maintenance', "Creating cephfs metadata pool")
-        log("Creating cephfs_metadata pool", level=INFO)
-        metadata_pool = "{}_metadata".format(name)
-        try:
-            ceph.ReplicatedPool(name=metadata_pool, service='admin').create()
-        except subprocess.CalledProcessError as err:
-            log("Creating metadata pool failed!")
-            raise err
-
-        status_set('maintenance', "Creating cephfs")
-        log("Creating ceph fs", level=INFO)
-        try:
-            subprocess.check_call(["ceph", "fs", "new", name, metadata_pool, data_pool])
-        except subprocess.CalledProcessError as err:
-            log("Creating metadata pool failed!")
-            raise err
         service_restart('ceph-mds')
         set_state('cephfs.started')
     except subprocess.CalledProcessError as err:
@@ -82,24 +56,11 @@ def config_changed(ceph_client):
         os.makedirs(key_path)
     cephx_key = os.path.join(key_path,
                              'keyring')
-    admin_key = os.path.join(os.sep,
-                             'etc',
-                             'ceph',
-                             'ceph.client.admin.keyring')
-
-    networks = get_networks('ceph-public-network')
-    public_network = ', '.join(networks)
-
-    networks = get_networks('ceph-cluster-network')
-    cluster_network = ', '.join(networks)
-
     ceph_context = {
-        'mon_hosts': ceph_client.mon_hosts(),
         'fsid': ceph_client.fsid(),
         'auth_supported': ceph_client.auth(),
         'use_syslog': str(config('use-syslog')).lower(),
-        'ceph_public_network': public_network,
-        'ceph_cluster_network': cluster_network,
+        'mon_hosts': ' '.join(ceph_client.mon_hosts()),
         'loglevel': config('loglevel'),
         'hostname': socket.gethostname(),
         'mds_name': socket.gethostname(),
@@ -112,20 +73,14 @@ def config_changed(ceph_client):
         log("IOError writing ceph.conf: {}".format(err))
 
     try:
-        with open(admin_key, 'w') as key_file:
-            key_file.write("[client.admin]\n\tkey = {}\n".format(
-                ceph_client.admin_key()
-            ))
-    except IOError as err:
-        log("IOError writing admin.keyring: {}".format(err))
-
-    try:
         with open(cephx_key, 'w') as key_file:
             key_file.write("[mds.{}]\n\tkey = {}\n".format(
                 socket.gethostname(),
-                ceph_client.key()
+                ceph_client.mds_key()
+                # ceph_client.mds_bootstrap_key()
             ))
     except IOError as err:
+
         log("IOError writing mds-a.keyring: {}".format(err))
     set_state('cephfs.configured')
 
