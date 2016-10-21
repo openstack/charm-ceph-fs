@@ -29,9 +29,9 @@ def install_cephfs():
 
 
 @when('cephfs.configured')
-@when('cephfs.pools.created')
+@when('ceph-mds.pools.available')
 @when_not('cephfs.started')
-def setup_mds():
+def setup_mds(relation):
     try:
         service_restart('ceph-mds')
         set_state('cephfs.started')
