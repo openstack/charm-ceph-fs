@@ -1,2 +1,6 @@
-includes: ['layer:apt', 'layer:ceph-base', 'interface:/home/chris/repos/juju-interface-ceph-mds']  # if you use any interfaces, add them here
-repo: git@github.com:cholcombe973/charm-ceph-fs.git
+includes: ['layer:apt', 'layer:ceph-base', 'interface:ceph-mds']  # if you use any interfaces, add them here
+options:
+  apt:
+    packages:
+      - python3-pyxattr
+repo: https://git.openstack.org/openstack/charm-ceph-fs

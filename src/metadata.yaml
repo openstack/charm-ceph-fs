@@ -11,6 +11,7 @@ tags:
   - misc
 series:
   - xenial
+  - yakkety
 subordinate: false
 requires:
   ceph-mds:

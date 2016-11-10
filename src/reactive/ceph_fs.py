@@ -1,19 +1,38 @@
+# Copyright 2016 Canonical Ltd
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import os
 import socket
 import subprocess
 
 from charms.reactive import when, when_not, set_state
 from charmhelpers.core.hookenv import (
-    config, log, ERROR, service_name)
+    application_version_set, config, log, ERROR)
 from charmhelpers.core.host import service_restart
 from charmhelpers.contrib.network.ip import (
     get_address_in_network
 )
+from charmhelpers.fetch import (
+    get_upstream_version,
+)
+
 import jinja2
 
 from charms.apt import queue_install
 
 TEMPLATES_DIR = 'templates'
+VERSION_PACKAGE = 'ceph-common'
 
 
 def render_template(template_name, context, template_dir=TEMPLATES_DIR):
@@ -35,6 +54,7 @@ def setup_mds(relation):
     try:
         service_restart('ceph-mds')
         set_state('cephfs.started')
+        application_version_set(get_upstream_version(VERSION_PACKAGE))
     except subprocess.CalledProcessError as err:
         log(message='Error: {}'.format(err), level=ERROR)
 
@@ -77,10 +97,8 @@ def config_changed(ceph_client):
             key_file.write("[mds.{}]\n\tkey = {}\n".format(
                 socket.gethostname(),
                 ceph_client.mds_key()
-                # ceph_client.mds_bootstrap_key()
             ))
     except IOError as err:
-
         log("IOError writing mds-a.keyring: {}".format(err))
     set_state('cephfs.configured')
 

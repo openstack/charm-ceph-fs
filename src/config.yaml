@@ -1,7 +1,4 @@
 options:
-  apt:
-    packages:
-      - python3-pyxattr
   ceph-public-network:
     type: string
     default:

@@ -13,14 +13,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-__author__ = 'Chris Holcombe <chris.holcombe@canonical.com>'
 import os
-from charmhelpers.core.hookenv import action_get, action_fail
+from charmhelpers.core.hookenv import action_get, action_fail, action_set
 import xattr
 
+__author__ = 'Chris Holcombe <chris.holcombe@canonical.com>'
 
-def set_quota():
+
+def get_quota():
     max_files = action_get('max-files')
     max_bytes = action_get('max-bytes')
     directory = action_get('directory')
@@ -28,20 +28,18 @@ def set_quota():
     if not os.path.exists(directory):
         action_fail("Directory must exist before setting quota")
     attr = "ceph.quota.{}"
-    value = None
     if max_files:
-        attr.format("max_files")
-        value = str(max_files)
+        attr = attr.format("max_files")
     elif max_bytes:
-        attr.format("max_bytes")
-        value = str(max_bytes)
+        attr = attr.format("max_bytes")
 
     try:
-        xattr.setxattr(directory, attr, value)
+        quota_value = xattr.getxattr(directory, attr)
+        action_set({'{} quota'.format(directory): quota_value})
     except IOError as err:
         action_fail(
-            "Unable to set xattr on {}.  Error: {}".format(directory, err))
+            "Unable to get xattr on {}.  Error: {}".format(directory, err))
 
 
 if __name__ == '__main__':
-    set_quota()
+    get_quota()

@@ -2,7 +2,7 @@ get-quota:
   description: View quota settings on a directory
   params:
     max-files:
-      type: boolean
+      type: integer
       description: |
         The limit of how many files can be written. Use either this or
         max-bytes but not both. The action tries max-files first and then
@@ -23,7 +23,7 @@ remove-quota:
   description: Remove a quota on a directory
   params:
     max-files:
-      type: boolean
+      type: integer
       description: |
         The limit of how many files can be written. Use either this or
         max-bytes but not both. The action tries max-files first and then
