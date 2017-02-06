@@ -18,19 +18,27 @@ import subprocess
 
 from charms.reactive import when, when_not, set_state
 from charmhelpers.core.hookenv import (
-    application_version_set, config, log, ERROR)
+    application_version_set, config, log, ERROR, cached, DEBUG, unit_get,
+    network_get_primary_address,
+    status_set)
 from charmhelpers.core.host import service_restart
 from charmhelpers.contrib.network.ip import (
-    get_address_in_network
-)
+    get_address_in_network,
+    get_ipv6_addr)
+
 from charmhelpers.fetch import (
     get_upstream_version,
-)
-
+    apt_install, filter_installed_packages)
 import jinja2
 
 from charms.apt import queue_install
 
+try:
+    import dns.resolver
+except ImportError:
+    apt_install(filter_installed_packages(['python-dnspython']),
+                fatal=True)
+    import dns.resolver
 TEMPLATES_DIR = 'templates'
 VERSION_PACKAGE = 'ceph-common'
 
@@ -76,6 +84,7 @@ def config_changed(ceph_client):
         os.makedirs(key_path)
     cephx_key = os.path.join(key_path,
                              'keyring')
+
     ceph_context = {
         'fsid': ceph_client.fsid(),
         'auth_supported': ceph_client.auth(),
@@ -85,6 +94,15 @@ def config_changed(ceph_client):
         'hostname': socket.gethostname(),
         'mds_name': socket.gethostname(),
     }
+
+    networks = get_networks('ceph-public-network')
+    if networks:
+        ceph_context['ceph_public_network'] = ', '.join(networks)
+    elif config('prefer-ipv6'):
+        dynamic_ipv6_address = get_ipv6_addr()[0]
+        ceph_context['public_addr'] = dynamic_ipv6_address
+    else:
+        ceph_context['public_addr'] = get_public_addr()
 
     try:
         with open(charm_ceph_conf, 'w') as ceph_conf:
@@ -115,3 +133,59 @@ def get_networks(config_opt='ceph-public-network'):
         return [n for n in networks if get_address_in_network(n)]
 
     return []
+
+
+@cached
+def get_public_addr():
+    if config('ceph-public-network'):
+        return get_network_addrs('ceph-public-network')[0]
+
+    try:
+        return network_get_primary_address('public')
+    except NotImplementedError:
+        log("network-get not supported", DEBUG)
+
+    return get_host_ip()
+
+
+@cached
+def get_host_ip(hostname=None):
+    if config('prefer-ipv6'):
+        return get_ipv6_addr()[0]
+
+    hostname = hostname or unit_get('private-address')
+    try:
+        # Test to see if already an IPv4 address
+        socket.inet_aton(hostname)
+        return hostname
+    except socket.error:
+        # This may throw an NXDOMAIN exception; in which case
+        # things are badly broken so just let it kill the hook
+        answers = dns.resolver.query(hostname, 'A')
+        if answers:
+            return answers[0].address
+
+
+def get_network_addrs(config_opt):
+    """Get all configured public networks addresses.
+
+    If public network(s) are provided, go through them and return the
+    addresses we have configured on any of those networks.
+    """
+    addrs = []
+    networks = config(config_opt)
+    if networks:
+        networks = networks.split()
+        addrs = [get_address_in_network(n) for n in networks]
+        addrs = [a for a in addrs if a]
+
+    if not addrs:
+        if networks:
+            msg = ("Could not find an address on any of '%s' - resolve this "
+                   "error to retry" % networks)
+            status_set('blocked', msg)
+            raise Exception(msg)
+        else:
+            return [get_host_ip()]
+
+    return addrs
