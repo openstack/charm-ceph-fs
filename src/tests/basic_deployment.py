@@ -81,14 +81,10 @@ class CephFsBasicDeployment(OpenStackAmuletDeployment):
         """Configure all of the services.
         :param **kwargs:
         """
-        # Include a non-existent device as osd-devices is a whitelist,
-        # and this will catch cases where proposals attempt to change that.
+        # NOTE(jamespage): fix fsid to allow later validation
         ceph_mon_config = {
-            'monitor-count': '3',
-            'auth-supported': 'none',
             'fsid': '6547bd3e-1397-11e2-82e5-53567c8d32dc',
         }
-
         # Include a non-existent device as osd-devices is a whitelist,
         # and this will catch cases where proposals attempt to change that.
         ceph_osd_config = {
@@ -184,9 +180,9 @@ class CephFsBasicDeployment(OpenStackAmuletDeployment):
                 'err to syslog': 'false',
                 'clog to syslog': 'false',
                 'mon cluster log to syslog': 'false',
-                'auth cluster required': 'none',
-                'auth service required': 'none',
-                'auth client required': 'none'
+                'auth cluster required': 'cephx',
+                'auth service required': 'cephx',
+                'auth client required': 'cephx'
             },
             'mon': {
                 'keyring': '/var/lib/ceph/mon/$cluster-$id/keyring'

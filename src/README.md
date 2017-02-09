@@ -12,20 +12,14 @@ Usage
 
 Boot things up by using:
 
-    juju deploy -n 3 --config ceph.yaml ceph-mon
-    juju deploy -n 3 --config ceph.yaml ceph-osd
+    juju deploy -n 3 ceph-mon
+    juju deploy -n 3 ceph-osd
+
 In my example deployments on EC2 the following ceph.yaml will work:
-```
-ceph-mon:
-  source: cloud:trusty-mitaka
-ceph-osd:
-  osd-devices: /dev/xvdb
-  ephemeral-unmount: "/mnt"
-  source: cloud:trusty-mitaka
-```
+
 You can then deploy this charm by simply doing:
 
-    juju deploy --config ceph.yaml ceph-fs
+    juju deploy ceph-fs
     juju add-relation ceph-fs ceph-mon
 
 Once the ceph-mon and osd charms have bootstrapped the cluster, the ceph-mon

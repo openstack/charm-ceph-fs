@@ -1,13 +1,4 @@
 options:
-  ceph-public-network:
-    type: string
-    default:
-    description: |
-      The IP address and netmask of the public (front-side) network (e.g.,
-      192.168.0.0/24)
-      .
-      If multiple networks are to be used, a space-delimited list of a.b.c.d/x
-      can be provided.
   loglevel:
     default: 1
     type: int

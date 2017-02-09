@@ -1,4 +1,4 @@
-includes: ['layer:apt', 'layer:ceph-base', 'interface:ceph-mds']  # if you use any interfaces, add them here
+includes: ['layer:apt', 'layer:ceph-base', 'interface:ceph-mds']
 options:
   apt:
     packages:
