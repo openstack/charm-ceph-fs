@@ -19,5 +19,7 @@
 from basic_deployment import CephFsBasicDeployment
 
 if __name__ == '__main__':
-    deployment = CephFsBasicDeployment(series='xenial')
+    deployment = CephFsBasicDeployment(series='xenial',
+                                       openstack='cloud:xenial-ocata',
+                                       source='cloud:xenial-updates/ocata')
     deployment.run_tests()

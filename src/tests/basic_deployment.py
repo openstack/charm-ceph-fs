@@ -59,13 +59,15 @@ class CephFsBasicDeployment(OpenStackAmuletDeployment):
            compatible with the local charm (e.g. stable or next).
         :param **kwargs:
            """
+        no_origin = ['ceph-fs']
         this_service = {'name': 'ceph-fs', 'units': 1}
         other_services = [
             {'name': 'ceph-mon', 'units': 3},
             {'name': 'ceph-osd', 'units': 3},
         ]
         super(CephFsBasicDeployment, self)._add_services(this_service,
-                                                         other_services)
+                                                         other_services,
+                                                         no_origin=no_origin)
 
     def _add_relations(self, **kwargs):
         """Add all of the relations for the services.
@@ -81,21 +83,28 @@ class CephFsBasicDeployment(OpenStackAmuletDeployment):
         """Configure all of the services.
         :param **kwargs:
         """
+        ceph_fs_config = {
+            'source': self.source,
+        }
         # NOTE(jamespage): fix fsid to allow later validation
         ceph_mon_config = {
             'fsid': '6547bd3e-1397-11e2-82e5-53567c8d32dc',
+            'source': self.source,
         }
         # Include a non-existent device as osd-devices is a whitelist,
         # and this will catch cases where proposals attempt to change that.
         ceph_osd_config = {
             'osd-reformat': 'yes',
             'ephemeral-unmount': '/mnt',
-            'osd-devices': '/dev/vdb /srv/ceph /dev/test-non-existent'
+            'osd-devices': '/dev/vdb /srv/ceph /dev/test-non-existent',
+            'source': self.source,
         }
 
         configs = {
             'ceph-mon': ceph_mon_config,
-            'ceph-osd': ceph_osd_config}
+            'ceph-osd': ceph_osd_config,
+            'ceph-fs': ceph_fs_config,
+        }
         super(CephFsBasicDeployment, self)._configure_services(configs)
 
     def _initialize_tests(self):
