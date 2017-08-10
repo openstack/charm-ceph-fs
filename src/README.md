@@ -15,8 +15,6 @@ Boot things up by using:
     juju deploy -n 3 ceph-mon
     juju deploy -n 3 ceph-osd
 
-In my example deployments on EC2 the following ceph.yaml will work:
-
 You can then deploy this charm by simply doing:
 
     juju deploy ceph-fs
