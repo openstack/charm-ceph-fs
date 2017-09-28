@@ -14,10 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Amulet tests on a basic ceph deployment on xenial-mitaka."""
+"""Amulet tests on a basic ceph deployment on artful-pike."""
 
 from basic_deployment import CephFsBasicDeployment
 
 if __name__ == '__main__':
-    deployment = CephFsBasicDeployment(series='xenial')
+    deployment = CephFsBasicDeployment(series='artful')
     deployment.run_tests()

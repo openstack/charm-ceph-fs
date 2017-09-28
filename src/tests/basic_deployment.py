@@ -210,7 +210,11 @@ class CephFsBasicDeployment(OpenStackAmuletDeployment):
         """Check osd pools on all ceph units, expect them to be
         identical, and expect specific pools to be present."""
         u.log.debug('Checking pools on ceph units...')
-        expected_pools = ['rbd', 'ceph-fs_data', 'ceph-fs_metadata']
+
+        if self._get_openstack_release() >= self.xenial_pike:
+            expected_pools = ['ceph-fs_data', 'ceph-fs_metadata']
+        else:
+            expected_pools = ['rbd', 'ceph-fs_data', 'ceph-fs_metadata']
         results = []
         sentries = [
             self.ceph_mon0_sentry,
