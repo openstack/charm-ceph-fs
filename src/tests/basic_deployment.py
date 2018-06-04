@@ -63,7 +63,8 @@ class CephFsBasicDeployment(OpenStackAmuletDeployment):
         this_service = {'name': 'ceph-fs', 'units': 1}
         other_services = [
             {'name': 'ceph-mon', 'units': 3},
-            {'name': 'ceph-osd', 'units': 3},
+            {'name': 'ceph-osd', 'units': 3,
+             'storage': {'osd-devices': 'cinder,10G'}},
         ]
         super(CephFsBasicDeployment, self)._add_services(this_service,
                                                          other_services,
@@ -94,10 +95,8 @@ class CephFsBasicDeployment(OpenStackAmuletDeployment):
         # Include a non-existent device as osd-devices is a whitelist,
         # and this will catch cases where proposals attempt to change that.
         ceph_osd_config = {
-            'osd-reformat': True,
-            'ephemeral-unmount': '/mnt',
-            'osd-devices': '/dev/vdb /srv/ceph /dev/test-non-existent',
             'source': self.source,
+            'osd-devices': '/srv/ceph /dev/test-non-existent',
         }
 
         configs = {
