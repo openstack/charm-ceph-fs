@@ -87,9 +87,7 @@ class CephFsBasicDeployment(OpenStackAmuletDeployment):
         ceph_fs_config = {
             'source': self.source,
         }
-        # NOTE(jamespage): fix fsid to allow later validation
         ceph_mon_config = {
-            'fsid': '6547bd3e-1397-11e2-82e5-53567c8d32dc',
             'source': self.source,
         }
         # Include a non-existent device as osd-devices is a whitelist,
@@ -180,9 +178,10 @@ class CephFsBasicDeployment(OpenStackAmuletDeployment):
         u.log.debug('Checking ceph config file data...')
         unit = self.ceph_mon0_sentry
         conf = '/etc/ceph/ceph.conf'
+        (fsid, _) = unit.run('leader-get fsid')
         expected = {
             'global': {
-                'fsid': '6547bd3e-1397-11e2-82e5-53567c8d32dc',
+                'fsid': fsid,
                 'log to syslog': 'false',
                 'err to syslog': 'false',
                 'clog to syslog': 'false',
