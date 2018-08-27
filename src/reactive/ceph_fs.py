@@ -17,13 +17,16 @@ import socket
 import subprocess
 
 from charms import reactive
-from charms.reactive import when, when_not, set_state, is_state
+from charms.reactive import when, when_not
+from charms.reactive.flags import set_flag, clear_flag, is_flag_set
 from charmhelpers.core import hookenv
 from charmhelpers.core.hookenv import (
     application_version_set, config, log, ERROR, cached, DEBUG, unit_get,
     network_get_primary_address, relation_ids,
     status_set)
-from charmhelpers.core.host import service_restart
+from charmhelpers.core.host import (
+    service_restart,
+    service)
 from charmhelpers.contrib.network.ip import (
     get_address_in_network,
     get_ipv6_addr)
@@ -69,12 +72,14 @@ def install_cephfs():
 @when('ceph-mds.pools.available')
 @when_not('cephfs.started')
 def setup_mds(relation):
-    try:
-        service_restart('ceph-mds')
-        set_state('cephfs.started')
+    service_name = 'ceph-mds@{}'.format(socket.gethostname())
+    if service_restart(service_name):
+        set_flag('cephfs.started')
+        service('enable', service_name)
         application_version_set(get_upstream_version(VERSION_PACKAGE))
-    except subprocess.CalledProcessError as err:
-        log(message='Error: {}'.format(err), level=ERROR)
+    else:
+        log(message='Error: restarting cpeh-mds', level=ERROR)
+        clear_flag('cephfs.started')
 
 
 @when('ceph-mds.available')
@@ -119,6 +124,8 @@ def config_changed(ceph_client):
             ceph_conf.write(render_template('ceph.conf', ceph_context))
     except IOError as err:
         log("IOError writing ceph.conf: {}".format(err))
+        clear_flag('cephfs.configured')
+        return
 
     try:
         with open(cephx_key, 'w') as key_file:
@@ -128,7 +135,9 @@ def config_changed(ceph_client):
             ))
     except IOError as err:
         log("IOError writing mds-a.keyring: {}".format(err))
-    set_state('cephfs.configured')
+        clear_flag('cephfs.configured')
+        return
+    set_flag('cephfs.configured')
 
 
 def get_networks(config_opt='ceph-public-network'):
@@ -205,7 +214,7 @@ def assess_status():
     """Assess status of current unit"""
     statuses = set([])
     messages = set([])
-    if is_state('cephfs.started'):
+    if is_flag_set('cephfs.started'):
         (status, message) = log_mds()
         statuses.add(status)
         messages.add(message)
