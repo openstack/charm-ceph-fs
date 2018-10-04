@@ -1,5 +1,7 @@
 includes: ['layer:basic', 'layer:apt', 'interface:ceph-mds']
 options:
+  status:
+    patch-hookenv: False
   apt:
     packages:
       - python3-pyxattr
