@@ -17,9 +17,10 @@ import socket
 import subprocess
 
 from charms import reactive
-from charms.reactive import when, when_not
+from charms.reactive import when, when_not, hook
 from charms.reactive.flags import set_flag, clear_flag, is_flag_set
 from charmhelpers.core import hookenv
+from charmhelpers.core import unitdata
 from charmhelpers.core.hookenv import (
     application_version_set, config, log, ERROR, cached, DEBUG, unit_get,
     network_get_primary_address, relation_ids,
@@ -214,6 +215,14 @@ def assess_status():
     """Assess status of current unit"""
     statuses = set([])
     messages = set([])
+
+    # Handle Series Upgrade
+    if unitdata.kv().get('charm.vault.series-upgrading'):
+        status_set("blocked",
+                   "Ready for do-release-upgrade and reboot. "
+                   "Set complete when finished.")
+        return
+
     if is_flag_set('cephfs.started'):
         (status, message) = log_mds()
         statuses.add(status)
@@ -247,6 +256,7 @@ def log_mds():
     else:
         return 'active', 'Unit is ready ({} MDS)'.format(len(running_mds))
 
+
 # Per https://github.com/juju-solutions/charms.reactive/issues/33,
 # this module may be imported multiple times so ensure the
 # initialization hook is only registered once. I have to piggy back
@@ -260,3 +270,19 @@ if not hasattr(reactive, '_ceph_log_registered'):
     # and the intialization provided an opertunity to be run.
     hookenv.atexit(assess_status)
     reactive._ceph_log_registered = True
+
+
+# Series upgrade hooks are a special case and reacting to the hook directly
+# makes sense as we may not want other charm code to run
+@hook('pre-series-upgrade')
+def pre_series_upgrade():
+    """Handler for pre-series-upgrade.
+    """
+    unitdata.kv().set('charm.vault.series-upgrading', True)
+
+
+@hook('post-series-upgrade')
+def post_series_upgrade():
+    """Handler for post-series-upgrade.
+    """
+    unitdata.kv().set('charm.vault.series-upgrading', False)
