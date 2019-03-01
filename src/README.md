@@ -1,5 +1,8 @@
 # CephFS Charm
 
+This charm exists to provide an example integration of CephFS, for the purpose
+of test and reference.  It is not intended for production use at this time.
+
 # Overview
 
 Ceph is a distributed storage and network file system designed to provide
