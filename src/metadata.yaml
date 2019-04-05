@@ -13,6 +13,7 @@ series:
   - xenial
   - bionic
   - cosmic
+  - disco
 subordinate: false
 requires:
   ceph-mds:
