@@ -16,6 +16,8 @@ import os
 import socket
 import subprocess
 
+import dns.resolver
+
 from charms import reactive
 from charms.reactive import when, when_not, hook
 from charms.reactive.flags import set_flag, clear_flag, is_flag_set
@@ -34,19 +36,13 @@ from charmhelpers.contrib.network.ip import (
 
 from charmhelpers.fetch import (
     get_upstream_version,
-    apt_install, filter_installed_packages)
+)
 import jinja2
 
 from charms.apt import queue_install, add_source
 
-PACKAGES = ['ceph', 'gdisk', 'ntp', 'btrfs-tools', 'python-ceph', 'xfsprogs']
+PACKAGES = ['ceph', 'gdisk', 'ntp', 'btrfs-tools', 'xfsprogs']
 
-try:
-    import dns.resolver
-except ImportError:
-    apt_install(filter_installed_packages(['python-dnspython']),
-                fatal=True)
-    import dns.resolver
 TEMPLATES_DIR = 'templates'
 VERSION_PACKAGE = 'ceph-common'
 
