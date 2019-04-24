@@ -2,7 +2,4 @@ includes: ['layer:basic', 'layer:apt', 'interface:ceph-mds']
 options:
   status:
     patch-hookenv: False
-  apt:
-    packages:
-      - python3-pyxattr
 repo: https://git.openstack.org/openstack/charm-ceph-fs

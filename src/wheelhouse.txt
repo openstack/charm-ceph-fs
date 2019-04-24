@@ -1,3 +1,6 @@
 netifaces
 dnspython3
 ceph_api
+pyxattr
+jinja2
+psutil
