@@ -128,6 +128,13 @@ class CephFsBasicDeployment(OpenStackAmuletDeployment):
         ceph_osd_processes = {
             'ceph-osd': 2
         }
+
+        # Pre-nautilus (ie. pre-train) we had a directory backed OSD and
+        # a disk backed OSD, but at nautilus (and beyond) we only have
+        # the disk backed OSD.
+        if self._get_openstack_release() >= self.bionic_train:
+            ceph_osd_processes['ceph-osd'] = 1
+
         ceph_mds_processes = {
             'ceph-mds': 1
         }
