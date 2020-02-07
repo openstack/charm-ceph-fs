@@ -5,18 +5,19 @@ gate_bundles:
   - bionic-rocky
   - bionic-queens
   - xenial-queens
-  - xenial-pike
+  # Xenial-pike is missing because of
+  # https://bugs.launchpad.net/charm-nova-compute/+bug/1862624
   - xenial-ocata
   - xenial-mitaka
 smoke_bundles:
   - bionic-stein
 dev_bundles:
   - cosmic-rocky
-  - disco-stein
 configure:
   - zaza.openstack.charm_tests.glance.setup.add_lts_image
+  - zaza.openstack.charm_tests.neutron.setup.basic_overcloud_network
+  - zaza.openstack.charm_tests.nova.setup.create_flavors
+  - zaza.openstack.charm_tests.nova.setup.manage_ssh_key
+  - zaza.openstack.charm_tests.keystone.setup.add_demo_user
 tests:
-  - zaza.openstack.charm_tests.ceph.tests.CephLowLevelTest
-  - zaza.openstack.charm_tests.ceph.tests.CephRelationTest
-  - zaza.openstack.charm_tests.ceph.tests.CephTest
-  - zaza.openstack.charm_tests.ceph.osd.tests.SecurityTest
+  - zaza.openstack.charm_tests.ceph.fs.tests.CephFSTests

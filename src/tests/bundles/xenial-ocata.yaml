@@ -19,7 +19,6 @@ applications:
     num_units: 3
     options:
       monitor-count: '3'
-      auth-supported: 'none'
       source: cloud:xenial-ocata
   percona-cluster:
     charm: cs:~openstack-charmers-next/percona-cluster
@@ -39,32 +38,43 @@ applications:
     num_units: 1
     options:
       openstack-origin: cloud:xenial-ocata
-  nova-compute:
-    charm: cs:~openstack-charmers-next/nova-compute
-    num_units: 1
-    options:
-      openstack-origin: cloud:xenial-ocata
   glance:
     expose: True
     charm: cs:~openstack-charmers-next/glance
     num_units: 1
     options:
       openstack-origin: cloud:xenial-ocata
-  cinder:
-    expose: True
-    charm: cs:~openstack-charmers-next/cinder
-    num_units: 1
-    options:
-      block-device: 'None'
-      glance-api-version: '2'
-      openstack-origin: cloud:xenial-ocata
-  cinder-ceph:
-    charm: cs:~openstack-charmers-next/cinder-ceph
   nova-cloud-controller:
     expose: True
     charm: cs:~openstack-charmers-next/nova-cloud-controller
     num_units: 1
     options:
+      network-manager: Neutron
+      openstack-origin: cloud:xenial-ocata
+  nova-compute:
+    charm: cs:~openstack-charmers-next/nova-compute
+    num_units: 2
+    constraints: mem=8G
+    options:
+      config-flags: default_ephemeral_format=ext4
+      enable-live-migration: true
+      enable-resize: true
+      migration-auth-type: ssh
+      openstack-origin: cloud:xenial-ocata
+  neutron-api:
+    charm: cs:~openstack-charmers-next/neutron-api
+    num_units: 1
+    options:
+      flat-network-providers: physnet1
+      neutron-security-groups: true
+      openstack-origin: cloud:xenial-ocata
+  neutron-openvswitch:
+    charm: cs:~openstack-charmers-next/neutron-openvswitch
+  neutron-gateway:
+    charm: cs:~openstack-charmers-next/neutron-gateway
+    num_units: 1
+    options:
+      bridge-mappings: physnet1:br-ex
       openstack-origin: cloud:xenial-ocata
 relations:
 - - ceph-mon:mds
@@ -85,18 +95,6 @@ relations:
   - rabbitmq-server:amqp
 - - glance:ceph
   - ceph-mon:client
-- - cinder:shared-db
-  - percona-cluster:shared-db
-- - cinder:identity-service
-  - keystone:identity-service
-- - cinder:amqp
-  - rabbitmq-server:amqp
-- - cinder:image-service
-  - glance:image-service
-- - cinder-ceph:storage-backend
-  - cinder:storage-backend
-- - cinder-ceph:ceph
-  - ceph-mon:client
 - - ceph-osd:mon
   - ceph-mon:osd
 - - nova-cloud-controller:shared-db
@@ -109,3 +107,21 @@ relations:
   - nova-compute:cloud-compute
 - - nova-cloud-controller:image-service
   - glance:image-service
+- - 'neutron-api:shared-db'
+  - 'percona-cluster:shared-db'
+- - 'neutron-api:amqp'
+  - 'rabbitmq-server:amqp'
+- - 'neutron-api:neutron-api'
+  - 'nova-cloud-controller:neutron-api'
+- - 'neutron-api:neutron-plugin-api'
+  - 'neutron-gateway:neutron-plugin-api'
+- - 'neutron-api:identity-service'
+  - 'keystone:identity-service'
+- - 'nova-compute:neutron-plugin'
+  - 'neutron-openvswitch:neutron-plugin'
+- - 'neutron-gateway:amqp'
+  - 'rabbitmq-server:amqp'
+- - 'neutron-openvswitch:amqp'
+  - 'rabbitmq-server:amqp'
+- - 'nova-cloud-controller:quantum-network-service'
+  - 'neutron-gateway:quantum-network-service'
