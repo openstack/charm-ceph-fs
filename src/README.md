@@ -1,7 +1,7 @@
 # CephFS Charm
 
 This charm exists to provide an example integration of CephFS, for the purpose
-of test and reference.  It is not intended for production use at this time.
+of test and reference.
 
 # Overview
 
