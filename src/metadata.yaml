@@ -13,6 +13,7 @@ series:
   - xenial
   - bionic
   - eoan
+  - focal
 subordinate: false
 requires:
   ceph-mds:

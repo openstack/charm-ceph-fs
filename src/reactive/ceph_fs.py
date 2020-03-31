@@ -28,6 +28,8 @@ from charmhelpers.core.hookenv import (
     network_get_primary_address, relation_ids,
     status_set)
 from charmhelpers.core.host import (
+    CompareHostReleases,
+    lsb_release,
     service_restart,
     service)
 from charmhelpers.contrib.network.ip import (
@@ -42,6 +44,7 @@ import jinja2
 from charms.apt import queue_install, add_source
 
 PACKAGES = ['ceph', 'gdisk', 'ntp', 'btrfs-tools', 'xfsprogs']
+PACKAGES_FOCAL = ['ceph', 'gdisk', 'ntp', 'btrfs-progs', 'xfsprogs']
 
 TEMPLATES_DIR = 'templates'
 VERSION_PACKAGE = 'ceph-common'
@@ -57,7 +60,11 @@ def render_template(template_name, context, template_dir=TEMPLATES_DIR):
 @when_not('apt.installed.ceph')
 def install_ceph_base():
     add_source(config('source'), key=config('key'))
-    queue_install(PACKAGES)
+    release = lsb_release()['DISTRIB_CODENAME'].lower()
+    if CompareHostReleases(release) >= 'focal':
+        queue_install(PACKAGES_FOCAL)
+    else:
+        queue_install(PACKAGES)
 
 
 @when_not('apt.installed.ceph-mds')
@@ -281,4 +288,7 @@ def pre_series_upgrade():
 def post_series_upgrade():
     """Handler for post-series-upgrade.
     """
+    release = lsb_release()['DISTRIB_CODENAME'].lower()
+    if CompareHostReleases(release) >= 'focal':
+        queue_install(PACKAGES_FOCAL)
     unitdata.kv().set('charm.vault.series-upgrading', False)
