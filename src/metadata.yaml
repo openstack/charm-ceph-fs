@@ -5,15 +5,16 @@ description: |
   Ceph is a distributed storage and network file system designed to provide
   excellent performance, reliability, and scalability.
 tags:
-  - openstack
-  - storage
-  - file-servers
-  - misc
+- openstack
+- storage
+- file-servers
+- misc
 series:
-  - xenial
-  - bionic
-  - eoan
-  - focal
+- xenial
+- bionic
+- eoan
+- focal
+- groovy
 subordinate: false
 requires:
   ceph-mds:
