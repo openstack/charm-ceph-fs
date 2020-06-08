@@ -2,7 +2,7 @@ import sys
 
 sys.path.append('src/actions')
 import unittest
-from mock import patch, call, Mock
+from unittest.mock import patch, call, Mock
 
 __author__ = 'Chris Holcombe <chris.holcombe@canonical.com>'
 
