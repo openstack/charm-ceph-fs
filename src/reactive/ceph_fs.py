@@ -12,283 +12,36 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import socket
-import subprocess
-
-import dns.resolver
-
 from charms import reactive
-from charms.reactive import when, when_not, hook
-from charms.reactive.flags import set_flag, clear_flag, is_flag_set
-from charmhelpers.core import hookenv
-from charmhelpers.core import unitdata
-from charmhelpers.core.hookenv import (
-    application_version_set, config, log, ERROR, cached, DEBUG, unit_get,
-    network_get_primary_address, relation_ids,
-    status_set)
-from charmhelpers.core.host import (
-    CompareHostReleases,
-    lsb_release,
-    service_restart,
-    service)
-from charmhelpers.contrib.network.ip import (
-    get_address_in_network,
-    get_ipv6_addr)
 
-from charmhelpers.fetch import (
-    get_upstream_version,
+import charms_openstack.bus
+import charms_openstack.charm as charm
+
+
+charms_openstack.bus.discover()
+
+
+charm.use_defaults(
+    'charm.installed',
+    'config.changed',
+    'config.rendered',
+    'upgrade-charm',
+    'update-status',
 )
-import jinja2
-
-from charms.apt import queue_install, add_source
-
-PACKAGES = ['ceph', 'gdisk', 'ntp', 'btrfs-tools', 'xfsprogs']
-PACKAGES_FOCAL = ['ceph', 'gdisk', 'ntp', 'btrfs-progs', 'xfsprogs']
-
-TEMPLATES_DIR = 'templates'
-VERSION_PACKAGE = 'ceph-common'
 
 
-def render_template(template_name, context, template_dir=TEMPLATES_DIR):
-    templates = jinja2.Environment(
-        loader=jinja2.FileSystemLoader(template_dir))
-    template = templates.get_template(template_name)
-    return template.render(context)
-
-
-@when_not('apt.installed.ceph')
-def install_ceph_base():
-    add_source(config('source'), key=config('key'))
-    release = lsb_release()['DISTRIB_CODENAME'].lower()
-    if CompareHostReleases(release) >= 'focal':
-        queue_install(PACKAGES_FOCAL)
-    else:
-        queue_install(PACKAGES)
-
-
-@when_not('apt.installed.ceph-mds')
-def install_cephfs():
-    queue_install(['ceph-mds'])
-
-
-@when('cephfs.configured')
-@when('ceph-mds.pools.available')
-@when_not('cephfs.started')
-def setup_mds(relation):
-    service_name = 'ceph-mds@{}'.format(socket.gethostname())
-    if service_restart(service_name):
-        set_flag('cephfs.started')
-        service('enable', service_name)
-        application_version_set(get_upstream_version(VERSION_PACKAGE))
-    else:
-        log(message='Error: restarting cpeh-mds', level=ERROR)
-        clear_flag('cephfs.started')
-
-
-@when('ceph-mds.available')
-def config_changed(ceph_client):
-    charm_ceph_conf = os.path.join(os.sep,
-                                   'etc',
-                                   'ceph',
-                                   'ceph.conf')
-    key_path = os.path.join(os.sep,
-                            'var',
-                            'lib',
-                            'ceph',
-                            'mds',
-                            'ceph-{}'.format(socket.gethostname())
-                            )
-    if not os.path.exists(key_path):
-        os.makedirs(key_path)
-    cephx_key = os.path.join(key_path,
-                             'keyring')
-
-    ceph_context = {
-        'fsid': ceph_client.fsid(),
-        'auth_supported': ceph_client.auth(),
-        'use_syslog': str(config('use-syslog')).lower(),
-        'mon_hosts': ' '.join(ceph_client.mon_hosts()),
-        'loglevel': config('loglevel'),
-        'hostname': socket.gethostname(),
-        'mds_name': socket.gethostname(),
-    }
-
-    networks = get_networks('ceph-public-network')
-    if networks:
-        ceph_context['ceph_public_network'] = ', '.join(networks)
-    elif config('prefer-ipv6'):
-        dynamic_ipv6_address = get_ipv6_addr()[0]
-        ceph_context['public_addr'] = dynamic_ipv6_address
-    else:
-        ceph_context['public_addr'] = get_public_addr()
-
-    try:
-        with open(charm_ceph_conf, 'w') as ceph_conf:
-            ceph_conf.write(render_template('ceph.conf', ceph_context))
-    except IOError as err:
-        log("IOError writing ceph.conf: {}".format(err))
-        clear_flag('cephfs.configured')
-        return
-
-    try:
-        with open(cephx_key, 'w') as key_file:
-            key_file.write("[mds.{}]\n\tkey = {}\n".format(
-                socket.gethostname(),
-                ceph_client.mds_key()
-            ))
-    except IOError as err:
-        log("IOError writing mds-a.keyring: {}".format(err))
-        clear_flag('cephfs.configured')
-        return
-    set_flag('cephfs.configured')
-
-
-def get_networks(config_opt='ceph-public-network'):
-    """Get all configured networks from provided config option.
-
-    If public network(s) are provided, go through them and return those for
-    which we have an address configured.
-    """
-    networks = config(config_opt)
-    if networks:
-        networks = networks.split()
-        return [n for n in networks if get_address_in_network(n)]
-
-    return []
-
-
-@cached
-def get_public_addr():
-    if config('ceph-public-network'):
-        return get_network_addrs('ceph-public-network')[0]
-
-    try:
-        return network_get_primary_address('public')
-    except NotImplementedError:
-        log("network-get not supported", DEBUG)
-
-    return get_host_ip()
-
-
-@cached
-def get_host_ip(hostname=None):
-    if config('prefer-ipv6'):
-        return get_ipv6_addr()[0]
-
-    hostname = hostname or unit_get('private-address')
-    try:
-        # Test to see if already an IPv4 address
-        socket.inet_aton(hostname)
-        return hostname
-    except socket.error:
-        # This may throw an NXDOMAIN exception; in which case
-        # things are badly broken so just let it kill the hook
-        answers = dns.resolver.query(hostname, 'A')
-        if answers:
-            return answers[0].address
-
-
-def get_network_addrs(config_opt):
-    """Get all configured public networks addresses.
-
-    If public network(s) are provided, go through them and return the
-    addresses we have configured on any of those networks.
-    """
-    addrs = []
-    networks = config(config_opt)
-    if networks:
-        networks = networks.split()
-        addrs = [get_address_in_network(n) for n in networks]
-        addrs = [a for a in addrs if a]
-
-    if not addrs:
-        if networks:
-            msg = ("Could not find an address on any of '%s' - resolve this "
-                   "error to retry" % networks)
-            status_set('blocked', msg)
-            raise Exception(msg)
-        else:
-            return [get_host_ip()]
-
-    return addrs
-
-
-def assess_status():
-    """Assess status of current unit"""
-    statuses = set([])
-    messages = set([])
-
-    # Handle Series Upgrade
-    if unitdata.kv().get('charm.vault.series-upgrading'):
-        status_set("blocked",
-                   "Ready for do-release-upgrade and reboot. "
-                   "Set complete when finished.")
-        return
-
-    if is_flag_set('cephfs.started'):
-        (status, message) = log_mds()
-        statuses.add(status)
-        messages.add(message)
-    if 'blocked' in statuses:
-        status = 'blocked'
-    elif 'waiting' in statuses:
-        status = 'waiting'
-    else:
-        status = 'active'
-    message = '; '.join(messages)
-    status_set(status, message)
-
-
-def get_running_mds():
-    """Returns a list of the pids of the current running MDS daemons"""
-    cmd = ['pgrep', 'ceph-mds']
-    try:
-        result = subprocess.check_output(cmd).decode('utf-8')
-        return result.split()
-    except subprocess.CalledProcessError:
-        return []
-
-
-def log_mds():
-    if len(relation_ids('ceph-mds')) < 1:
-        return 'blocked', 'Missing relation: monitor'
-    running_mds = get_running_mds()
-    if not running_mds:
-        return 'blocked', 'No MDS detected using current configuration'
-    else:
-        return 'active', 'Unit is ready ({} MDS)'.format(len(running_mds))
-
-
-# Per https://github.com/juju-solutions/charms.reactive/issues/33,
-# this module may be imported multiple times so ensure the
-# initialization hook is only registered once. I have to piggy back
-# onto the namespace of a module imported before reactive discovery
-# to do this.
-if not hasattr(reactive, '_ceph_log_registered'):
-    # We need to register this to run every hook, not just during install
-    # and config-changed, to protect against race conditions. If we don't
-    # do this, then the config in the hook environment may show updates
-    # to running hooks well before the config-changed hook has been invoked
-    # and the intialization provided an opertunity to be run.
-    hookenv.atexit(assess_status)
-    reactive._ceph_log_registered = True
-
-
-# Series upgrade hooks are a special case and reacting to the hook directly
-# makes sense as we may not want other charm code to run
-@hook('pre-series-upgrade')
-def pre_series_upgrade():
-    """Handler for pre-series-upgrade.
-    """
-    unitdata.kv().set('charm.vault.series-upgrading', True)
-
-
-@hook('post-series-upgrade')
-def post_series_upgrade():
-    """Handler for post-series-upgrade.
-    """
-    release = lsb_release()['DISTRIB_CODENAME'].lower()
-    if CompareHostReleases(release) >= 'focal':
-        queue_install(PACKAGES_FOCAL)
-    unitdata.kv().set('charm.vault.series-upgrading', False)
+@reactive.when_none('charm.paused', 'run-default-update-status')
+@reactive.when('ceph-mds.available')
+def config_changed():
+    ceph_mds = reactive.endpoint_from_flag('ceph-mds.available')
+    with charm.provide_charm_instance() as cephfs_charm:
+        cephfs_charm.configure_ceph_keyring(ceph_mds.mds_key())
+        cephfs_charm.render_with_interfaces([ceph_mds])
+        if reactive.is_flag_set('config.changed.source'):
+            # update system source configuration and check for upgrade
+            cephfs_charm.install()
+            cephfs_charm.upgrade_if_available([ceph_mds])
+            reactive.clear_flag('config.changed.source')
+        reactive.set_flag('cephfs.configured')
+        reactive.set_flag('config.rendered')
+        cephfs_charm.assess_status()

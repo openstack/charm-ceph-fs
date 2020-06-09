@@ -1,5 +1,14 @@
-includes: ['layer:basic', 'layer:apt', 'interface:ceph-mds']
+includes: ['layer:ceph', 'interface:ceph-mds']
 options:
-  status:
-    patch-hookenv: False
+  basic:
+    use_venv: True
+    include_system_packages: False
 repo: https://git.openstack.org/openstack/charm-ceph-fs
+config:
+  deletes:
+    - debug
+    - ssl_ca
+    - ssl_cert
+    - ssl_key
+    - use-internal-endpoints
+    - verbose

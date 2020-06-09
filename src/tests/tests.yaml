@@ -23,6 +23,7 @@ configure:
   - zaza.openstack.charm_tests.keystone.setup.add_demo_user
 tests:
   - zaza.openstack.charm_tests.ceph.fs.tests.CephFSTests
+  - zaza.openstack.charm_tests.ceph.fs.tests.CharmOperationTest
 tests_options:
   force_deploy:
     - focal-ussuri
