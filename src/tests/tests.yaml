@@ -14,7 +14,8 @@ gate_bundles:
 smoke_bundles:
   - bionic-stein
 dev_bundles:
-  - bionic-train
+  - groovy-victoria
+  - focal-victoria
 configure:
   - zaza.openstack.charm_tests.glance.setup.add_lts_image
   - zaza.openstack.charm_tests.neutron.setup.basic_overcloud_network
@@ -26,4 +27,4 @@ tests:
   - zaza.openstack.charm_tests.ceph.fs.tests.CharmOperationTest
 tests_options:
   force_deploy:
-    - focal-ussuri
+    - groovy-victoria
