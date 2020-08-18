@@ -13,6 +13,7 @@
 # limitations under the License.
 
 from charms import reactive
+from charmhelpers.core import hookenv
 
 import charms_openstack.bus
 import charms_openstack.charm as charm
@@ -31,9 +32,9 @@ charm.use_defaults(
 
 
 @reactive.when_none('charm.paused', 'run-default-update-status')
-@reactive.when('ceph-mds.available')
+@reactive.when('ceph-mds.pools.available')
 def config_changed():
-    ceph_mds = reactive.endpoint_from_flag('ceph-mds.available')
+    ceph_mds = reactive.endpoint_from_flag('ceph-mds.pools.available')
     with charm.provide_charm_instance() as cephfs_charm:
         cephfs_charm.configure_ceph_keyring(ceph_mds.mds_key())
         cephfs_charm.render_with_interfaces([ceph_mds])
@@ -45,3 +46,11 @@ def config_changed():
         reactive.set_flag('cephfs.configured')
         reactive.set_flag('config.rendered')
         cephfs_charm.assess_status()
+
+
+@reactive.when_not('ceph.create_pool.req.sent')
+@reactive.when('ceph-mds.connected')
+def storage_ceph_connected(ceph):
+    ceph.announce_mds_name()
+    ceph.initialize_mds(hookenv.service_name())
+    reactive.set_state('ceph.create_pool.req.sent')

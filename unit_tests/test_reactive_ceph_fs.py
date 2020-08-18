@@ -32,7 +32,11 @@ class TestRegisteredHooks(test_utils.TestRegisteredHooks):
         ]
         hook_set = {
             'when': {
-                'config_changed': ('ceph-mds.available',),
+                'config_changed': ('ceph-mds.pools.available',),
+                'storage_ceph_connected': ('ceph-mds.connected',),
+            },
+            'when_not': {
+                'storage_ceph_connected': ('ceph.create_pool.req.sent',),
             },
             'when_none': {
                 'config_changed': ('charm.paused',
@@ -65,7 +69,8 @@ class TestCephFSHandlers(test_utils.PatchHelper):
         self.endpoint_from_flag.return_value = ceph_mds
         self.is_flag_set.return_value = False
         handlers.config_changed()
-        self.endpoint_from_flag.assert_called_once_with('ceph-mds.available')
+        self.endpoint_from_flag.assert_called_once_with(
+            'ceph-mds.pools.available')
         self.target.configure_ceph_keyring.assert_called_once_with('fakekey')
         self.target.render_with_interfaces.assert_called_once_with([ceph_mds])
         self.is_flag_set.assert_called_once_with('config.changed.source')
