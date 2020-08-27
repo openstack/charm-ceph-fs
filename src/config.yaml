@@ -76,7 +76,15 @@ options:
     default:
     type: string
     description: |
-      Optionally specify an existing rbd pool that cinder should map to.
+      Name of the data pool to be created/used. If not defined a data pool name
+      will be generated based on the name of the application.
+  metadata-pool:
+    type: string
+    default:
+    description: |
+      Name of the metadata pool to be created/used. If not defined a metadata
+      pool name will be generated based on the name of the application.
+      The metadata pool is always replicated, not erasure coded.
   pool-type:
     type: string
     default: replicated
@@ -90,14 +98,6 @@ options:
       Name for the EC profile to be created for the EC pools. If not defined
       a profile name will be generated based on the name of the pool used by
       the application.
-  ec-rbd-metadata-pool:
-    type: string
-    default:
-    description: |
-      Name of the metadata pool to be created (for RBD use-cases). If not
-      defined a metadata pool name will be generated based on the name of
-      the data pool used by the application.  The metadata pool is always
-      replicated, not erasure coded.
   ec-profile-k:
     type: int
     default: 1
