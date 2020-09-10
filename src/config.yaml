@@ -90,7 +90,24 @@ options:
     default: replicated
     description: |
       Ceph pool type to use for storage - valid values include ‘replicated’
-      and ‘erasure-coded’.
+      and ‘erasure-coded’.  Note that if erasure-coded is enabled then data
+      pools for both replicated and erasure-coded are created - use of the
+      erasure-coded pool is controlled using xattrs on directories and files.
+  ec-pool-weight:
+    type: int
+    default: 5
+    description: |
+      Defines a relative weighting of the EC pool as a percentage of the total
+      amount of data in the Ceph cluster. This effectively weights the number
+      of placement groups for the pool created to be appropriately portioned
+      to the amount of data expected. For example, if the compute images
+      for the OpenStack compute instances are expected to take up 20% of the
+      overall configuration then this value would be specified as 20. Note -
+      it is important to choose an appropriate value for the pool weight as
+      this directly affects the number of placement groups which will be
+      created for the pool. The number of placement groups for a pool can
+      only be increased, never decreased - so it is important to identify the
+      percent of data that will likely reside in the pool.
   ec-profile-name:
     type: string
     default:

@@ -1,5 +1,6 @@
 charm_name: ceph-fs
 gate_bundles:
+  - focal-ussuri-ec
   - focal-victoria
   - focal-ussuri
   - bionic-ussuri
