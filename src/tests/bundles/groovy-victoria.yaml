@@ -41,12 +41,15 @@ applications:
     num_units: 1
     options:
       source: *openstack-origin
+      pool-type: erasure-coded
+      ec-profile-k: 4
+      ec-profile-m: 2
     to:
       - '3'
 
   ceph-osd:
     charm: cs:~openstack-charmers-next/ceph-osd
-    num_units: 3
+    num_units: 6
     storage:
       osd-devices: 'cinder,10G'
     options:

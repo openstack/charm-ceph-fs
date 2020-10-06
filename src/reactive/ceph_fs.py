@@ -13,6 +13,9 @@
 # limitations under the License.
 
 from charms import reactive
+
+import charmhelpers.core as ch_core
+
 from charmhelpers.core.hookenv import (
     service_name,
     config)
@@ -50,7 +53,6 @@ def config_changed():
         cephfs_charm.assess_status()
 
 
-@reactive.when_not('ceph.create_pool.req.sent')
 @reactive.when('ceph-mds.connected')
 def storage_ceph_connected(ceph):
     ceph_mds = reactive.endpoint_from_flag('ceph-mds.connected')
@@ -77,6 +79,18 @@ def storage_ceph_connected(ceph):
     # Resize data pool weight to accomodate metadata weight
     weight = weight - metadata_weight
     extra_pools = []
+
+    bluestore_compression = None
+    with charm.provide_charm_instance() as cephfs_charm:
+        # TODO: move this whole method into the charm class and add to the
+        # common pool creation logic in charms.openstack. For now we reuse
+        # the common bluestore compression wrapper here.
+        try:
+            bluestore_compression = cephfs_charm._get_bluestore_compression()
+        except ValueError as e:
+            ch_core.hookenv.log('Invalid value(s) provided for Ceph BlueStore '
+                                'compression: "{}"'
+                                .format(str(e)))
 
     if config('pool-type') == 'erasure-coded':
         # General EC plugin config
@@ -115,18 +129,34 @@ def storage_ceph_connected(ceph):
 
         # Create EC data pool
         ec_pool_name = 'ec_{}'.format(pool_name)
-        ceph_mds.create_erasure_pool(
-            name=ec_pool_name,
-            erasure_profile=profile_name,
-            weight=ec_pool_weight,
-            app_name=ceph_mds.ceph_pool_app_name,
-            allow_ec_overwrites=True
-        )
-        ceph_mds.create_replicated_pool(
-            name=pool_name,
-            weight=weight,
-            app_name=ceph_mds.ceph_pool_app_name
-        )
+
+        # NOTE(fnordahl): once we deprecate Python 3.5 support we can do
+        # the unpacking of the BlueStore compression arguments as part of
+        # the function arguments. Until then we need to build the dict
+        # prior to the function call.
+        kwargs = {
+            'name': ec_pool_name,
+            'erasure_profile': profile_name,
+            'weight': ec_pool_weight,
+            'app_name': ceph_mds.ceph_pool_app_name,
+            'allow_ec_overwrites': True,
+        }
+        if bluestore_compression:
+            kwargs.update(bluestore_compression)
+        ceph_mds.create_erasure_pool(**kwargs)
+
+        # NOTE(fnordahl): once we deprecate Python 3.5 support we can do
+        # the unpacking of the BlueStore compression arguments as part of
+        # the function arguments. Until then we need to build the dict
+        # prior to the function call.
+        kwargs = {
+            'name': pool_name,
+            'weight': weight,
+            'app_name': ceph_mds.ceph_pool_app_name,
+        }
+        if bluestore_compression:
+            kwargs.update(bluestore_compression)
+        ceph_mds.create_replicated_pool(**kwargs)
         ceph_mds.create_replicated_pool(
             name=metadata_pool_name,
             weight=metadata_weight,
@@ -134,15 +164,22 @@ def storage_ceph_connected(ceph):
         )
         extra_pools = [ec_pool_name]
     else:
-        ceph_mds.create_replicated_pool(
-            name=pool_name,
-            replicas=replicas,
-            weight=weight,
-            app_name=ceph_mds.ceph_pool_app_name)
+        # NOTE(fnordahl): once we deprecate Python 3.5 support we can do
+        # the unpacking of the BlueStore compression arguments as part of
+        # the function arguments. Until then we need to build the dict
+        # prior to the function call.
+        kwargs = {
+            'name': pool_name,
+            'replicas': replicas,
+            'weight': weight,
+            'app_name': ceph_mds.ceph_pool_app_name,
+        }
+        if bluestore_compression:
+            kwargs.update(bluestore_compression)
+        ceph_mds.create_replicated_pool(**kwargs)
         ceph_mds.create_replicated_pool(
             name=metadata_pool_name,
             replicas=replicas,
             weight=metadata_weight,
             app_name=ceph_mds.ceph_pool_app_name)
     ceph_mds.request_cephfs(service, extra_pools=extra_pools)
-    reactive.set_state('ceph.create_pool.req.sent')

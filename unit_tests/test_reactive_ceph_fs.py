@@ -35,9 +35,6 @@ class TestRegisteredHooks(test_utils.TestRegisteredHooks):
                 'config_changed': ('ceph-mds.pools.available',),
                 'storage_ceph_connected': ('ceph-mds.connected',),
             },
-            'when_not': {
-                'storage_ceph_connected': ('ceph.create_pool.req.sent',),
-            },
             'when_none': {
                 'config_changed': ('charm.paused',
                                    'run-default-update-status',),

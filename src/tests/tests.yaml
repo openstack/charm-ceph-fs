@@ -1,12 +1,11 @@
 charm_name: ceph-fs
 gate_bundles:
-  - focal-ussuri-ec
-  - focal-victoria
-  - focal-ussuri
-  - bionic-ussuri
-  - bionic-train
-  - bionic-stein
-  - bionic-rocky
+  - bluestore-compression: focal-victoria
+  - bluestore-compression: focal-ussuri
+  - bluestore-compression: bionic-ussuri
+  - bluestore-compression: bionic-train
+  - bluestore-compression: bionic-stein
+  - bluestore-compression: bionic-rocky
   - bionic-queens
   - xenial-queens
   # Xenial-pike is missing because of
@@ -14,18 +13,28 @@ gate_bundles:
   - xenial-ocata
   - xenial-mitaka
 smoke_bundles:
-  - bionic-stein
+  - bluestore-compression: bionic-stein
 dev_bundles:
-  - groovy-victoria
+  - bluestore-compression: groovy-victoria
 configure:
   - zaza.openstack.charm_tests.glance.setup.add_lts_image
   - zaza.openstack.charm_tests.neutron.setup.basic_overcloud_network
   - zaza.openstack.charm_tests.nova.setup.create_flavors
   - zaza.openstack.charm_tests.nova.setup.manage_ssh_key
   - zaza.openstack.charm_tests.keystone.setup.add_demo_user
+  - bluestore-compression:
+    - zaza.openstack.charm_tests.glance.setup.add_lts_image
+    - zaza.openstack.charm_tests.neutron.setup.basic_overcloud_network
+    - zaza.openstack.charm_tests.nova.setup.create_flavors
+    - zaza.openstack.charm_tests.nova.setup.manage_ssh_key
+    - zaza.openstack.charm_tests.keystone.setup.add_demo_user
 tests:
   - zaza.openstack.charm_tests.ceph.fs.tests.CephFSTests
   - zaza.openstack.charm_tests.ceph.fs.tests.CharmOperationTest
+  - bluestore-compression:
+    - zaza.openstack.charm_tests.ceph.fs.tests.CephFSTests
+    - zaza.openstack.charm_tests.ceph.fs.tests.CharmOperationTest
+    - zaza.openstack.charm_tests.ceph.tests.BlueStoreCompressionCharmOperation
 tests_options:
   force_deploy:
     - groovy-victoria
