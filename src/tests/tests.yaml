@@ -1,5 +1,6 @@
 charm_name: ceph-fs
 gate_bundles:
+  - bluestore-compression: groovy-victoria
   - bluestore-compression: focal-victoria
   - bluestore-compression: focal-ussuri
   - bluestore-compression: bionic-ussuri
@@ -14,8 +15,6 @@ gate_bundles:
   - xenial-mitaka
 smoke_bundles:
   - bluestore-compression: bionic-stein
-dev_bundles:
-  - bluestore-compression: groovy-victoria
 configure:
   - zaza.openstack.charm_tests.glance.setup.add_lts_image
   - zaza.openstack.charm_tests.neutron.setup.basic_overcloud_network
