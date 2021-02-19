@@ -8,11 +8,12 @@ gate_bundles:
   - bluestore-compression: bionic-stein
   - bluestore-compression: bionic-rocky
   - bionic-queens
-  - xenial-queens
+  - xenial-mitaka
+dev_bundles:
+  - xenial-ocata
   # Xenial-pike is missing because of
   # https://bugs.launchpad.net/charm-nova-compute/+bug/1862624
-  - xenial-ocata
-  - xenial-mitaka
+  - xenial-queens
 smoke_bundles:
   - bluestore-compression: bionic-stein
 configure:
