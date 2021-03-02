@@ -14,6 +14,7 @@ series:
 - bionic
 - focal
 - groovy
+- hirsute
 subordinate: false
 requires:
   ceph-mds:
