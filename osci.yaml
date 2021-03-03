@@ -8,16 +8,28 @@
       - tox-py37
       - tox-py38
 - job:
-    name: groovy-victoria-bluestore
+    name: hirsute-wallaby-bluestore
     parent: func-target
     dependencies: &smoke-jobs
       - bionic-queens_local
+    vars:
+      tox_extra_args: bluestore-compression:hirsute-wallaby
+- job:
+    name: groovy-victoria-bluestore
+    parent: func-target
+    dependencies: *smoke-jobs
     vars:
       tox_extra_args: bluestore-compression:groovy-victoria
 - job:
     name: xenial-mitaka_local
     parent: xenial-mitaka
     dependencies: *smoke-jobs
+- job:
+    name: focal-wallaby-bluestore
+    parent: func-target
+    dependencies: *smoke-jobs
+    vars:
+      tox_extra_args: bluestore-compression:focal-wallaby
 - job:
     name: focal-victoria-bluestore
     parent: func-target
@@ -61,7 +73,9 @@
         # Xenial-pike is missing because of
         # https://bugs.launchpad.net/charm-nova-compute/+bug/1862624
         - xenial-mitaka_local
+        - hirsute-wallaby-bluestore
         - groovy-victoria-bluestore
+        - focal-wallaby-bluestore
         - focal-victoria-bluestore
         - focal-ussuri-bluestore
         - bionic-ussuri-bluestore
