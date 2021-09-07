@@ -164,9 +164,9 @@ class BaseCephFSCharm(charms_openstack.plugins.CephCharm):
 
 class MitakaCephFSCharm(BaseCephFSCharm):
     release = 'mitaka'
-    packages = ['ceph-mds', 'gdisk', 'ntp', 'btrfs-tools', 'xfsprogs']
+    packages = ['ceph-mds', 'gdisk', 'btrfs-tools', 'xfsprogs']
 
 
 class UssuriCephFSCharm(BaseCephFSCharm):
     release = 'ussuri'
-    packages = ['ceph-mds', 'gdisk', 'ntp', 'btrfs-progs', 'xfsprogs']
+    packages = ['ceph-mds', 'gdisk', 'btrfs-progs', 'xfsprogs']

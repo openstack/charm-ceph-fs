@@ -33,7 +33,7 @@ class TestMitakaCephFsCharm(test_utils.PatchHelper):
         # future versions of this charm, see ``TestCephFsCharm`` for the rest
         # of the tests
         self.assertEquals(self.target.packages, [
-            'ceph-mds', 'gdisk', 'ntp', 'btrfs-tools', 'xfsprogs'])
+            'ceph-mds', 'gdisk', 'btrfs-tools', 'xfsprogs'])
 
 
 class TestCephFsCharm(test_utils.PatchHelper):
@@ -59,7 +59,7 @@ class TestCephFsCharm(test_utils.PatchHelper):
         self.assertDictEqual(self.target.restart_map, {
             '/etc/ceph/ceph.conf': ['ceph-mds@somehost']})
         self.assertEquals(self.target.packages, [
-            'ceph-mds', 'gdisk', 'ntp', 'btrfs-progs', 'xfsprogs'])
+            'ceph-mds', 'gdisk', 'btrfs-progs', 'xfsprogs'])
 
     def test_configuration_class(self):
         self.assertEquals(self.target.options.hostname, 'somehost')
