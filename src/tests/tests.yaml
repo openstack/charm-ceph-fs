@@ -11,6 +11,7 @@ gate_bundles:
   - bionic-queens
   - xenial-mitaka
 dev_bundles:
+  - bluestore-compression: impish-xena
   - bluestore-compression: hirsute-wallaby
   - xenial-ocata
   # Xenial-pike is missing because of
@@ -40,3 +41,4 @@ tests:
 tests_options:
   force_deploy:
     - hirsute-wallaby
+    - impish-xena
