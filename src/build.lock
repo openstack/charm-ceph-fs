@@ -53,7 +53,7 @@
       "item": "interface:ceph-mds",
       "url": "https://opendev.org/openstack/charm-interface-ceph-client.git",
       "vcs": null,
-      "branch": null,
+      "branch": "3ca251fb01a7cd51d2a0ee2b9b66647c8ffe891f",
       "commit": "3ca251fb01a7cd51d2a0ee2b9b66647c8ffe891f"
     },
     {
