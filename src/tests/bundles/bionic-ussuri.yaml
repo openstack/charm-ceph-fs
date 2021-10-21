@@ -16,14 +16,12 @@ applications:
     options:
       osd-devices: '/dev/test-non-existent'
       source: cloud:bionic-ussuri
-    channel: candidate
   ceph-mon:
     charm: cs:~openstack-charmers/ceph-mon
     num_units: 3
     options:
       monitor-count: '3'
       source: cloud:bionic-ussuri
-    channel: candidate
   percona-cluster:
     charm: cs:~openstack-charmers/percona-cluster
     num_units: 1
@@ -31,27 +29,23 @@ applications:
       dataset-size: 25%
       max-connections: 1000
       source: cloud:bionic-ussuri
-    channel: candidate
   rabbitmq-server:
     charm: cs:~openstack-charmers/rabbitmq-server
     num_units: 1
     options:
       source: cloud:bionic-ussuri
-    channel: candidate
   keystone:
     expose: True
     charm: cs:~openstack-charmers/keystone
     num_units: 1
     options:
       openstack-origin: cloud:bionic-ussuri
-    channel: candidate
   glance:
     expose: True
     charm: cs:~openstack-charmers/glance
     num_units: 1
     options:
       openstack-origin: cloud:bionic-ussuri
-    channel: candidate
   nova-cloud-controller:
     expose: True
     charm: cs:~openstack-charmers/nova-cloud-controller
@@ -59,7 +53,6 @@ applications:
     options:
       network-manager: Neutron
       openstack-origin: cloud:bionic-ussuri
-    channel: candidate
   nova-compute:
     charm: cs:~openstack-charmers/nova-compute
     num_units: 2
@@ -70,13 +63,11 @@ applications:
       enable-resize: true
       migration-auth-type: ssh
       openstack-origin: cloud:bionic-ussuri
-    channel: candidate
   placement:
     charm: cs:~openstack-charmers/placement
     num_units: 1
     options:
       openstack-origin: cloud:bionic-ussuri
-    channel: candidate
   neutron-api:
     charm: cs:~openstack-charmers/neutron-api
     num_units: 1
@@ -86,17 +77,14 @@ applications:
       flat-network-providers: physnet1
       neutron-security-groups: true
       openstack-origin: cloud:bionic-ussuri
-    channel: candidate
   neutron-openvswitch:
     charm: cs:~openstack-charmers/neutron-openvswitch
-    channel: candidate
   neutron-gateway:
     charm: cs:~openstack-charmers/neutron-gateway
     num_units: 1
     options:
       bridge-mappings: physnet1:br-ex
       openstack-origin: cloud:bionic-ussuri
-    channel: candidate
 relations:
 - - 'ceph-mon:mds'
   - 'ceph-fs:ceph-mds'

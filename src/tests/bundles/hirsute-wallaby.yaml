@@ -17,19 +17,14 @@ applications:
 
   keystone-mysql-router:
     charm: cs:~openstack-charmers/mysql-router
-    channel: candidate
   glance-mysql-router:
     charm: cs:~openstack-charmers/mysql-router
-    channel: candidate
   nova-cloud-controller-mysql-router:
     charm: cs:~openstack-charmers/mysql-router
-    channel: candidate
   placement-mysql-router:
     charm: cs:~openstack-charmers/mysql-router
-    channel: candidate
   neutron-api-mysql-router:
     charm: cs:~openstack-charmers/mysql-router
-    channel: candidate
 
   mysql-innodb-cluster:
     charm: cs:~openstack-charmers/mysql-innodb-cluster
@@ -40,7 +35,6 @@ applications:
       - '0'
       - '1'
       - '2'
-    channel: candidate
 
   ceph-fs:
     charm: ceph-fs
@@ -61,7 +55,6 @@ applications:
     options:
       osd-devices: '/dev/test-non-existent'
       source: *openstack-origin
-    channel: candidate
 
   ceph-mon:
     charm: cs:~openstack-charmers/ceph-mon
@@ -69,14 +62,12 @@ applications:
     options:
       monitor-count: '3'
       source: *openstack-origin
-    channel: candidate
 
   rabbitmq-server:
     charm: cs:~openstack-charmers/rabbitmq-server
     num_units: 1
     options:
       source: *openstack-origin
-    channel: candidate
 
   keystone:
     expose: True
@@ -84,7 +75,6 @@ applications:
     num_units: 1
     options:
       openstack-origin: *openstack-origin
-    channel: candidate
 
   glance:
     expose: True
@@ -92,7 +82,6 @@ applications:
     num_units: 1
     options:
       openstack-origin: *openstack-origin
-    channel: candidate
 
   nova-cloud-controller:
     expose: True
@@ -101,7 +90,6 @@ applications:
     options:
       network-manager: Neutron
       openstack-origin: *openstack-origin
-    channel: candidate
 
   nova-compute:
     charm: cs:~openstack-charmers/nova-compute
@@ -113,14 +101,12 @@ applications:
       enable-resize: true
       migration-auth-type: ssh
       openstack-origin: *openstack-origin
-    channel: candidate
 
   placement:
     charm: cs:~openstack-charmers/placement
     num_units: 1
     options:
       openstack-origin: *openstack-origin
-    channel: candidate
 
   neutron-api:
     charm: cs:~openstack-charmers/neutron-api
@@ -131,11 +117,9 @@ applications:
       flat-network-providers: physnet1
       neutron-security-groups: true
       openstack-origin: *openstack-origin
-    channel: candidate
 
   neutron-openvswitch:
     charm: cs:~openstack-charmers/neutron-openvswitch
-    channel: candidate
 
   neutron-gateway:
     charm: cs:~openstack-charmers/neutron-gateway
@@ -143,7 +127,6 @@ applications:
     options:
       bridge-mappings: physnet1:br-ex
       openstack-origin: *openstack-origin
-    channel: candidate
 
 relations:
 
