@@ -1,6 +1,8 @@
 variables:
   openstack-origin: &openstack-origin distro
 
+local_overlay_enabled: False
+
 series: &series jammy
 
 machines:
@@ -43,7 +45,7 @@ applications:
     channel: latest/edge
 
   ceph-fs:
-    charm: ceph-fs
+    charm: ../../../ceph-fs.charm
     num_units: 1
     options:
       source: *openstack-origin
