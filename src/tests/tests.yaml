@@ -1,7 +1,6 @@
 charm_name: ceph-fs
 gate_bundles:
   - focal-xena
-  - impish-wallaby
 dev_bundles:
   - focal-yoga
   - jammy-yoga
@@ -19,5 +18,4 @@ tests:
   - zaza.openstack.charm_tests.ceph.tests.BlueStoreCompressionCharmOperation
 tests_options:
   force_deploy:
-    - impish-xena
     - jammy-yoga

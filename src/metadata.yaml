@@ -11,7 +11,7 @@ tags:
 - misc
 series:
 - focal
-- impish
+- jammy
 subordinate: false
 requires:
   ceph-mds:
