@@ -54,6 +54,10 @@ class CephFSCharmConfigurationAdapter(
         return self.charm_instance.get_networks('ceph-public-network')
 
     @property
+    def mds_cache(self):
+        return self.charm_instance.get_mds_cache()
+
+    @property
     def public_addr(self):
         if ch_core.hookenv.config('prefer-ipv6'):
             return get_ipv6_addr()[0]
@@ -118,6 +122,13 @@ class BaseCephFSCharm(charms_openstack.plugins.CephCharm):
             log("network-get not supported", DEBUG)
 
         return self.get_host_ip()
+
+    def get_mds_cache(self):
+        return {'mds-cache-memory-limit': config('mds-cache-memory-limit'),
+                'mds-cache-reservation': config('mds-cache-reservation'),
+                'mds-health-cache-threshold':
+                config('mds-health-cache-threshold')
+                }
 
     @cached
     @staticmethod

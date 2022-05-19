@@ -258,3 +258,24 @@ options:
     description: |
       Value of bluestore compression max blob size for solid state media on
       pools requested by this charm.
+  mds-cache-memory-limit:
+    type: string
+    default: 4Gi
+    description: |
+      Set the maximum size of Metadata Server (MDS) cache, in bytes. The MDS
+      will try to stay under this value by (1 - mds_cache_reservation) as a
+      percent. This is not a hard limit.
+  mds-cache-reservation:
+    type: float
+    default: 0.05
+    description: |
+      The cache reservation for the MDS cache to maintain. The MDS will try
+      to stay under this value as a percent by (1 - mds_cache_reservation)
+      as a percent.
+  mds-health-cache-threshold:
+    type: float
+    default: 1.5
+    description: |
+      If the MDS exceeds the cache size specified in mds-cache-memory-limit,
+      this parameter sets the memory limit, as a percentage of
+      mds_cache_reservation, that triggers a health warning.

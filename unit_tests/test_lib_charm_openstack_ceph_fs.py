@@ -80,3 +80,12 @@ class TestCephFsCharm(test_utils.PatchHelper):
         self.assertEquals(
             self.target.options.public_addr,
             '2001:db8::fake')
+        self.patch_target('get_mds_cache')
+        self.get_mds_cache.return_value = {
+            'mds-cache-memory-limit': '4Gi',
+            'mds-cache-reservation': 0.05,
+            'mds-health-cache-threshold': 1.5}
+        self.assertEquals(self.target.options.mds_cache, {
+            'mds-cache-memory-limit': '4Gi',
+            'mds-cache-reservation': 0.05,
+            'mds-health-cache-threshold': 1.5})
