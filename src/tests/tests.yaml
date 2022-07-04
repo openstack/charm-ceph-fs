@@ -1,23 +1,8 @@
 charm_name: ceph-fs
 gate_bundles:
-  - bluestore-compression: groovy-victoria
-  - bluestore-compression: focal-wallaby
-  - bluestore-compression: focal-victoria
   - bluestore-compression: focal-ussuri
-  - bluestore-compression: bionic-ussuri
-  - bluestore-compression: bionic-train
-  - bluestore-compression: bionic-stein
-  - bluestore-compression: bionic-rocky
-  - bionic-queens
-  - xenial-mitaka
 dev_bundles:
-  - bluestore-compression: hirsute-wallaby
-  - xenial-ocata
-  # Xenial-pike is missing because of
-  # https://bugs.launchpad.net/charm-nova-compute/+bug/1862624
-  - xenial-queens
 smoke_bundles:
-  - bluestore-compression: focal-ussuri
 configure:
   - zaza.openstack.charm_tests.glance.setup.add_lts_image
   - zaza.openstack.charm_tests.neutron.setup.basic_overcloud_network
@@ -37,6 +22,3 @@ tests:
     - zaza.openstack.charm_tests.ceph.fs.tests.CephFSTests
     - zaza.openstack.charm_tests.ceph.fs.tests.CharmOperationTest
     - zaza.openstack.charm_tests.ceph.tests.BlueStoreCompressionCharmOperation
-tests_options:
-  force_deploy:
-    - hirsute-wallaby

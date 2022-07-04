@@ -16,18 +16,23 @@ machines:
 applications:
 
   keystone-mysql-router:
-    charm: cs:~openstack-charmers/mysql-router
+    charm: ch:mysql-router
+    channel: 8.0/edge
   glance-mysql-router:
-    charm: cs:~openstack-charmers/mysql-router
+    charm: ch:mysql-router
+    channel: 8.0/edge
   nova-cloud-controller-mysql-router:
-    charm: cs:~openstack-charmers/mysql-router
+    charm: ch:mysql-router
+    channel: 8.0/edge
   placement-mysql-router:
-    charm: cs:~openstack-charmers/mysql-router
+    charm: ch:mysql-router
+    channel: 8.0/edge
   neutron-api-mysql-router:
-    charm: cs:~openstack-charmers/mysql-router
+    charm: ch:mysql-router
+    channel: 8.0/edge
 
   mysql-innodb-cluster:
-    charm: cs:~openstack-charmers/mysql-innodb-cluster
+    charm: ch:mysql-innodb-cluster
     num_units: 3
     options:
       source: *openstack-origin
@@ -35,9 +40,10 @@ applications:
       - '0'
       - '1'
       - '2'
+    channel: 8.0/edge
 
   ceph-fs:
-    charm: ceph-fs
+    charm: ../../../ceph-fs.charm
     num_units: 1
     options:
       source: *openstack-origin
@@ -48,51 +54,57 @@ applications:
       - '3'
 
   ceph-osd:
-    charm: cs:~openstack-charmers/ceph-osd
+    charm: ch:ceph-osd
     num_units: 6
     storage:
       osd-devices: 'cinder,10G'
     options:
       osd-devices: '/dev/test-non-existent'
       source: *openstack-origin
+    channel: octopus/edge
 
   ceph-mon:
-    charm: cs:~openstack-charmers/ceph-mon
+    charm: ch:ceph-mon
     num_units: 3
     options:
       monitor-count: '3'
       source: *openstack-origin
+    channel: octopus/edge
 
   rabbitmq-server:
-    charm: cs:~openstack-charmers/rabbitmq-server
+    charm: ch:rabbitmq-server
     num_units: 1
     options:
       source: *openstack-origin
+    channel: 3.8/edge
 
   keystone:
     expose: True
-    charm: cs:~openstack-charmers/keystone
+    charm: ch:keystone
     num_units: 1
     options:
       openstack-origin: *openstack-origin
+    channel: ussuri/edge
 
   glance:
     expose: True
-    charm: cs:~openstack-charmers/glance
+    charm: ch:glance
     num_units: 1
     options:
       openstack-origin: *openstack-origin
+    channel: ussuri/edge
 
   nova-cloud-controller:
     expose: True
-    charm: cs:~openstack-charmers/nova-cloud-controller
+    charm: ch:nova-cloud-controller
     num_units: 1
     options:
       network-manager: Neutron
       openstack-origin: *openstack-origin
+    channel: ussuri/edge
 
   nova-compute:
-    charm: cs:~openstack-charmers/nova-compute
+    charm: ch:nova-compute
     num_units: 2
     constraints: mem=8G
     options:
@@ -101,15 +113,17 @@ applications:
       enable-resize: true
       migration-auth-type: ssh
       openstack-origin: *openstack-origin
+    channel: ussuri/edge
 
   placement:
-    charm: cs:~openstack-charmers/placement
+    charm: ch:placement
     num_units: 1
     options:
       openstack-origin: *openstack-origin
+    channel: ussuri/edge
 
   neutron-api:
-    charm: cs:~openstack-charmers/neutron-api
+    charm: ch:neutron-api
     num_units: 1
     options:
       manage-neutron-plugin-legacy-mode: true
@@ -117,16 +131,19 @@ applications:
       flat-network-providers: physnet1
       neutron-security-groups: true
       openstack-origin: *openstack-origin
+    channel: ussuri/edge
 
   neutron-openvswitch:
-    charm: cs:~openstack-charmers/neutron-openvswitch
+    charm: ch:neutron-openvswitch
+    channel: ussuri/edge
 
   neutron-gateway:
-    charm: cs:~openstack-charmers/neutron-gateway
+    charm: ch:neutron-gateway
     num_units: 1
     options:
       bridge-mappings: physnet1:br-ex
       openstack-origin: *openstack-origin
+    channel: ussuri/edge
 
 relations:
 

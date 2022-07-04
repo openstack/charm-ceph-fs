@@ -5,7 +5,7 @@ options:
     description: Mon and OSD debug level. Max is 20.
   source:
     type: string
-    default: distro
+    default: cloud:focal-ussuri
     description: |
       Optional configuration to support use of additional sources such as:
       .

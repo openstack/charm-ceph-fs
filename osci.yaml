@@ -1,86 +1,20 @@
-- job:
-    name: bionic-queens_local
-    parent: bionic-queens
-    dependencies: 
-      - osci-lint
-      - tox-py35
-      - tox-py36
-      - tox-py37
-      - tox-py38
-- job:
-    name: hirsute-wallaby-bluestore
-    parent: func-target
-    dependencies: &smoke-jobs
-      - bionic-queens_local
-    vars:
-      tox_extra_args: bluestore-compression:hirsute-wallaby
-- job:
-    name: groovy-victoria-bluestore
-    parent: func-target
-    dependencies: *smoke-jobs
-    vars:
-      tox_extra_args: bluestore-compression:groovy-victoria
-- job:
-    name: xenial-mitaka_local
-    parent: xenial-mitaka
-    dependencies: *smoke-jobs
-- job:
-    name: focal-wallaby-bluestore
-    parent: func-target
-    dependencies: *smoke-jobs
-    vars:
-      tox_extra_args: bluestore-compression:focal-wallaby
-- job:
-    name: focal-victoria-bluestore
-    parent: func-target
-    dependencies: *smoke-jobs
-    vars:
-      tox_extra_args: bluestore-compression:focal-victoria
-- job:
-    name: focal-ussuri-bluestore
-    parent: func-target
-    dependencies: *smoke-jobs
-    vars:
-      tox_extra_args: bluestore-compression:focal-ussuri
-- job:
-    name: bionic-ussuri-bluestore
-    parent: func-target
-    dependencies: *smoke-jobs
-    vars:
-      tox_extra_args: bluestore-compression:bionic-ussuri
-- job:
-    name: bionic-train-bluestore
-    parent: func-target
-    dependencies: *smoke-jobs
-    vars:
-      tox_extra_args: bluestore-compression:bionic-train
-- job:
-    name: bionic-stein-bluestore
-    parent: func-target
-    dependencies: *smoke-jobs
-    vars:
-      tox_extra_args: bluestore-compression:bionic-stein
-
 - project:
     templates:
-      - charm-unit-jobs
-      # using overridden, shorter functional list because the charm does
-      # already in the tests.yaml
-      # - charm-functional-jobs
+      - charm-unit-jobs-py38
     check:
       jobs:
-        - bionic-queens_local
-        # Xenial-pike is missing because of
-        # https://bugs.launchpad.net/charm-nova-compute/+bug/1862624
-        - xenial-mitaka_local
-        - hirsute-wallaby-bluestore
-        - groovy-victoria-bluestore
-        - focal-wallaby-bluestore
-        - focal-victoria-bluestore
         - focal-ussuri-bluestore
-        - bionic-ussuri-bluestore
-        - bionic-train-bluestore
-        - bionic-stein-bluestore
     vars:
       needs_charm_build: true
       charm_build_name: ceph-fs
+      build_type: charmcraft
+
+- job:
+    name: focal-ussuri-bluestore
+    parent: func-target
+    dependencies:
+      - osci-lint
+      - tox-py38
+      - charm-build
+    vars:
+      tox_extra_args: bluestore-compression:focal-ussuri
