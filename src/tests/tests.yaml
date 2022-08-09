@@ -1,7 +1,6 @@
 charm_name: ceph-fs
 gate_bundles:
   - focal-xena
-dev_bundles:
   - focal-yoga
   - jammy-yoga
 smoke_bundles:
@@ -16,6 +15,4 @@ tests:
   - zaza.openstack.charm_tests.ceph.fs.tests.CephFSTests
   - zaza.openstack.charm_tests.ceph.fs.tests.CharmOperationTest
   - zaza.openstack.charm_tests.ceph.tests.BlueStoreCompressionCharmOperation
-tests_options:
-  force_deploy:
-    - jammy-yoga
+
