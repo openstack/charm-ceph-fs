@@ -5,45 +5,10 @@ local_overlay_enabled: False
 
 series: &series focal
 
-machines:
-  '0':
-    constraints: "mem=3072M"
-  '1':
-    constraints: "mem=3072M"
-  '2':
-    constraints: "mem=3072M"
-  '3':
-
-
 applications:
-
-  keystone-mysql-router:
-    charm: ch:mysql-router
-    channel: latest/edge
-  glance-mysql-router:
-    charm: ch:mysql-router
-    channel: latest/edge
-  nova-cloud-controller-mysql-router:
-    charm: ch:mysql-router
-    channel: latest/edge
-  placement-mysql-router:
-    charm: ch:mysql-router
-    channel: latest/edge
-  neutron-api-mysql-router:
-    charm: ch:mysql-router
-    channel: latest/edge
-
-  mysql-innodb-cluster:
-    charm: ch:mysql-innodb-cluster
-    num_units: 3
-    options:
-      source: *openstack-origin
-    to:
-      - '0'
-      - '1'
-      - '2'
-    channel: latest/edge
-
+  ubuntu: # used to test mounts
+    charm: ch:ubuntu
+    num_units: 2
   ceph-fs:
     charm: ../../../ceph-fs.charm
     num_units: 1
@@ -52,8 +17,6 @@ applications:
       pool-type: erasure-coded
       ec-profile-k: 4
       ec-profile-m: 2
-    to:
-      - '3'
 
   ceph-osd:
     charm: ch:ceph-osd
@@ -73,169 +36,9 @@ applications:
       source: *openstack-origin
     channel: latest/edge
 
-  rabbitmq-server:
-    charm: ch:rabbitmq-server
-    num_units: 1
-    options:
-      source: *openstack-origin
-    channel: latest/edge
-
-  keystone:
-    expose: True
-    charm: ch:keystone
-    num_units: 1
-    options:
-      openstack-origin: *openstack-origin
-    channel: latest/edge
-
-  glance:
-    expose: True
-    charm: ch:glance
-    num_units: 1
-    options:
-      openstack-origin: *openstack-origin
-    channel: latest/edge
-
-  nova-cloud-controller:
-    expose: True
-    charm: ch:nova-cloud-controller
-    num_units: 1
-    options:
-      network-manager: Neutron
-      openstack-origin: *openstack-origin
-    channel: latest/edge
-
-  nova-compute:
-    charm: ch:nova-compute
-    num_units: 2
-    constraints: mem=8G
-    options:
-      config-flags: default_ephemeral_format=ext4
-      enable-live-migration: true
-      enable-resize: true
-      migration-auth-type: ssh
-      openstack-origin: *openstack-origin
-    channel: latest/edge
-
-  placement:
-    charm: ch:placement
-    num_units: 1
-    options:
-      openstack-origin: *openstack-origin
-    channel: latest/edge
-
-  neutron-api:
-    charm: ch:neutron-api
-    num_units: 1
-    options:
-      manage-neutron-plugin-legacy-mode: true
-      neutron-plugin: ovs
-      flat-network-providers: physnet1
-      neutron-security-groups: true
-      openstack-origin: *openstack-origin
-    channel: latest/edge
-
-  neutron-openvswitch:
-    charm: ch:neutron-openvswitch
-    channel: latest/edge
-
-  neutron-gateway:
-    charm: ch:neutron-gateway
-    num_units: 1
-    options:
-      bridge-mappings: physnet1:br-ex
-      openstack-origin: *openstack-origin
-    channel: latest/edge
-
 relations:
-
   - - 'ceph-mon:mds'
     - 'ceph-fs:ceph-mds'
 
-  - - 'nova-compute:amqp'
-    - 'rabbitmq-server:amqp'
-
-  - - 'nova-compute:image-service'
-    - 'glance:image-service'
-
-  - - 'nova-compute:ceph'
-    - 'ceph-mon:client'
-
-  - - 'keystone:shared-db'
-    - 'keystone-mysql-router:shared-db'
-  - - 'keystone-mysql-router:db-router'
-    - 'mysql-innodb-cluster:db-router'
-
-  - - 'glance:shared-db'
-    - 'glance-mysql-router:shared-db'
-  - - 'glance-mysql-router:db-router'
-    - 'mysql-innodb-cluster:db-router'
-
-  - - 'glance:identity-service'
-    - 'keystone:identity-service'
-
-  - - 'glance:amqp'
-    - 'rabbitmq-server:amqp'
-
-  - - 'glance:ceph'
-    - 'ceph-mon:client'
-
   - - 'ceph-osd:mon'
     - 'ceph-mon:osd'
-
-  - - 'nova-cloud-controller:shared-db'
-    - 'nova-cloud-controller-mysql-router:shared-db'
-  - - 'nova-cloud-controller-mysql-router:db-router'
-    - 'mysql-innodb-cluster:db-router'
-
-  - - 'nova-cloud-controller:identity-service'
-    - 'keystone:identity-service'
-
-  - - 'nova-cloud-controller:amqp'
-    - 'rabbitmq-server:amqp'
-
-  - - 'nova-cloud-controller:cloud-compute'
-    - 'nova-compute:cloud-compute'
-
-  - - 'nova-cloud-controller:image-service'
-    - 'glance:image-service'
-
-  - - 'placement:shared-db'
-    - 'placement-mysql-router:shared-db'
-  - - 'placement-mysql-router:db-router'
-    - 'mysql-innodb-cluster:db-router'
-
-  - - 'placement'
-    - 'keystone'
-
-  - - 'placement'
-    - 'nova-cloud-controller'
-
-  - - 'neutron-api:shared-db'
-    - 'neutron-api-mysql-router:shared-db'
-  - - 'neutron-api-mysql-router:db-router'
-    - 'mysql-innodb-cluster:db-router'
-
-  - - 'neutron-api:amqp'
-    - 'rabbitmq-server:amqp'
-
-  - - 'neutron-api:neutron-api'
-    - 'nova-cloud-controller:neutron-api'
-
-  - - 'neutron-api:neutron-plugin-api'
-    - 'neutron-gateway:neutron-plugin-api'
-
-  - - 'neutron-api:identity-service'
-    - 'keystone:identity-service'
-
-  - - 'nova-compute:neutron-plugin'
-    - 'neutron-openvswitch:neutron-plugin'
-
-  - - 'neutron-gateway:amqp'
-    - 'rabbitmq-server:amqp'
-
-  - - 'neutron-openvswitch:amqp'
-    - 'rabbitmq-server:amqp'
-
-  - - 'nova-cloud-controller:quantum-network-service'
-    - 'neutron-gateway:quantum-network-service'
