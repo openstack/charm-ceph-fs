@@ -12,6 +12,7 @@ tags:
 series:
 - focal
 - jammy
+- kinetic
 subordinate: false
 requires:
   ceph-mds:
