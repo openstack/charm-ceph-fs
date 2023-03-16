@@ -4,6 +4,13 @@
       - charm-unit-jobs-py39
       - charm-xena-functional-jobs
       - charm-yoga-functional-jobs
+      - charm-zed-functional-jobs
+    check:
+      jobs:
+      - jammy-antelope:
+          voting: false
+      - lunar-antelope:
+          voting: false
     vars:
       needs_charm_build: true
       charm_build_name: ceph-fs

@@ -12,6 +12,8 @@ tags:
 series:
 - focal
 - jammy
+- kinetic
+- lunar
 subordinate: false
 requires:
   ceph-mds:
