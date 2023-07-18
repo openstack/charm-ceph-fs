@@ -12,8 +12,8 @@ tags:
 series:
 - focal
 - jammy
-- kinetic
 - lunar
+- mantic
 subordinate: false
 requires:
   ceph-mds:

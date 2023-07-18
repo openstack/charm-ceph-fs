@@ -3,7 +3,7 @@ variables:
 
 local_overlay_enabled: False
 
-series: &series kinetic
+series: &series mantic
 
 applications:
   ubuntu: # used to test mounts
