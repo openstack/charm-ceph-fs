@@ -71,6 +71,14 @@ created: a replicated pool (for storing MDS metadata) and an erasure coded pool
 `ceph-osd-replication-count` configuration option only applies to the metadata
 (replicated) pool.
 
+Note that the replicated pool will be the default pool for all data.
+The user must manually configure the secondary erasure coded pool for use,
+for example by using [file layouts][file-layouts].
+
+It's not recommended to use an erasure coded data pool as the default data pool;
+see [createfs docs][createfs] for more explanation.
+Thus, the charm does not support this case.
+
 Erasure coded pools can be configured via options whose names begin with the
 `ec-` prefix.
 
@@ -135,3 +143,5 @@ For general charm questions refer to the OpenStack [Charm Guide][cg].
 [cloud-archive-ceph]: https://wiki.ubuntu.com/OpenStack/CloudArchive#Ceph_and_the_UCA
 [cdg-ceph-erasure-coding]: https://docs.openstack.org/project-deploy-guide/charm-deployment-guide/latest/app-erasure-coding.html
 [ceph-bluestore-compression]: https://docs.ceph.com/en/latest/rados/configuration/bluestore-config-ref/#inline-compression
+[createfs]: https://docs.ceph.com/en/latest/cephfs/createfs/
+[file-layouts]: https://docs.ceph.com/en/latest/cephfs/file-layouts/
