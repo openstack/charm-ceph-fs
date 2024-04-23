@@ -13,8 +13,6 @@ tags:
 series:
 - focal
 - jammy
-- lunar
-- mantic
 subordinate: false
 requires:
   ceph-mds:

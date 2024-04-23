@@ -26,7 +26,7 @@ applications:
     options:
       osd-devices: '/dev/test-non-existent'
       source: *openstack-origin
-    channel: latest/edge
+    channel: quincy/edge
 
   ceph-mon:
     charm: ch:ceph-mon
@@ -34,7 +34,7 @@ applications:
     options:
       monitor-count: '3'
       source: *openstack-origin
-    channel: latest/edge
+    channel: quincy/edge
 
 relations:
   - - 'ceph-mon:mds'
