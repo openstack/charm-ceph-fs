@@ -17,6 +17,7 @@ tests:
   - zaza.openstack.charm_tests.ceph.fs.tests.CephFSTests
   - zaza.openstack.charm_tests.ceph.fs.tests.CharmOperationTest
   - zaza.openstack.charm_tests.ceph.tests.BlueStoreCompressionCharmOperation
+  - zaza.openstack.charm_tests.ceph.tests.CephMonKeyRotationTests
 
 target_deploy_status:
   ubuntu:

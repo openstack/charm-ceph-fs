@@ -61,6 +61,8 @@ class TestCephFSHandlers(test_utils.PatchHelper):
         self.patch_object(handlers.reactive, 'is_flag_set')
         self.patch_object(handlers.reactive, 'clear_flag')
         self.patch_object(handlers.reactive, 'set_flag')
+        self.patch_object(handlers.os.path, 'exists')
+        handlers.os.path.exists.return_value = False
         ceph_mds = mock.MagicMock()
         ceph_mds.mds_key.return_value = 'fakekey'
         self.endpoint_from_flag.return_value = ceph_mds
