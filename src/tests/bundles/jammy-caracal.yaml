@@ -1,9 +1,9 @@
 variables:
-  openstack-origin: &openstack-origin distro
+  openstack-origin: &openstack-origin cloud:jammy-caracal
 
 local_overlay_enabled: False
 
-series: &series mantic
+series: &series jammy
 
 applications:
   ubuntu: # used to test mounts
