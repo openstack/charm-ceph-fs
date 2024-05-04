@@ -1,0 +1,3 @@
+name: cephfs_share
+summary: CephFS Share provider interface
+version: 1

@@ -1,4 +1,4 @@
-includes: ['layer:ceph', 'interface:ceph-mds']
+includes: ['layer:ceph', 'interface:ceph-mds', 'interface:cephfs_share']
 options:
   basic:
     use_venv: True

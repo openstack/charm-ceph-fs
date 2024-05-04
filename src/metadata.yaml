@@ -19,5 +19,9 @@ subordinate: false
 requires:
   ceph-mds:
     interface: ceph-mds
+provides:
+  cephfs-share:
+    interface: cephfs_share
+
 extra-bindings:
   public:

@@ -1,10 +1,10 @@
 build
 .tox
 layers
-interfaces
 .testrepository
 __pycache__
 *.pyc
 .idea
 .stestr
 *.charm
+.vscode
