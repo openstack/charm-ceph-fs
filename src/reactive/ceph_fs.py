@@ -1,4 +1,4 @@
-# Copyright 2016 Canonical Ltd
+# Copyright 2024 Canonical Ltd
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,6 +23,9 @@ from charmhelpers.core.hookenv import (
 import charms_openstack.bus
 import charms_openstack.charm as charm
 
+import os
+import subprocess
+
 
 charms_openstack.bus.discover()
 
@@ -41,6 +44,9 @@ charm.use_defaults(
 def config_changed():
     ceph_mds = reactive.endpoint_from_flag('ceph-mds.pools.available')
     with charm.provide_charm_instance() as cephfs_charm:
+        host = cephfs_charm.hostname
+        exists = os.path.exists('/var/lib/ceph/mds/ceph-%s/keyring' % host)
+
         cephfs_charm.configure_ceph_keyring(ceph_mds.mds_key())
         cephfs_charm.render_with_interfaces([ceph_mds])
         if reactive.is_flag_set('config.changed.source'):
@@ -51,6 +57,22 @@ def config_changed():
         reactive.set_flag('cephfs.configured')
         reactive.set_flag('config.rendered')
         cephfs_charm.assess_status()
+
+        # If the keyring file existed before this call, then the new
+        # provided key implies a rotation.
+        if exists:
+            svc = 'ceph-mds@%s.service' % host
+            try:
+                # Reset the failure count first, as the service may fail
+                # to come up due to the way the restart-map is handled.
+                subprocess.check_call(['sudo', 'systemctl',
+                                       'reset-failed', svc])
+                subprocess.check_call(['sudo', 'systemctl', 'restart', svc])
+            except subprocess.CalledProcessError as exc:
+                # The service can be temporarily masked when booting, so
+                # skip that class of errors.
+                ch_core.hookenv.log('Failed to restart MDS service: %s' %
+                                    str(exc))
 
 
 @reactive.when('ceph-mds.connected')
