@@ -11,8 +11,7 @@ tags:
 - file-servers
 - misc
 series:
-- focal
-- jammy
+- noble
 subordinate: false
 requires:
   ceph-mds:

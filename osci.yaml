@@ -2,10 +2,9 @@
     templates:
       - charm-unit-jobs-py38
       - charm-unit-jobs-py39
-      - charm-yoga-functional-jobs
       - charm-functional-jobs
     vars:
       needs_charm_build: true
       charm_build_name: ceph-fs
       build_type: charmcraft
-      charmcraft_channel: 2.x/stable
+      charmcraft_channel: 3.x/beta

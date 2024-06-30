@@ -1,12 +1,8 @@
 charm_name: ceph-fs
 gate_bundles:
-  - focal-xena
-  - focal-yoga
-  - jammy-yoga
-  - jammy-bobcat
-  - mantic-bobcat
+  - noble-caracal
 smoke_bundles:
-  - focal-xena
+  - noble-caracal
 # configure:
 #   - zaza.openstack.charm_tests.glance.setup.add_lts_image
 #   - zaza.openstack.charm_tests.neutron.setup.basic_overcloud_network
