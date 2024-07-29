@@ -18,3 +18,6 @@ cryptography<3.4
 git+https://github.com/juju/charm-tools.git
 
 simplejson
+
+# https://github.com/juju/charm-tools/issues/674
+path<17.0.0

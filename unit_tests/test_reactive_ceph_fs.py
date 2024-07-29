@@ -36,8 +36,14 @@ class TestRegisteredHooks(test_utils.TestRegisteredHooks):
                 'storage_ceph_connected': ('ceph-mds.connected',),
             },
             'when_none': {
-                'config_changed': ('charm.paused',
-                                   'run-default-update-status',),
+                'config_changed': (
+                    'charm.paused',
+                    'is-update-status-hook',
+                ),
+                'storage_ceph_connected': (
+                    'charm.paused',
+                    'is-update-status-hook',
+                ),
             },
         }
         # test that the hooks were registered via the reactive.ceph_fs module

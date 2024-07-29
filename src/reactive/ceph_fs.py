@@ -39,7 +39,7 @@ charm.use_defaults(
 )
 
 
-@reactive.when_none('charm.paused', 'run-default-update-status')
+@reactive.when_none('charm.paused', 'is-update-status-hook')
 @reactive.when('ceph-mds.pools.available')
 def config_changed():
     ceph_mds = reactive.endpoint_from_flag('ceph-mds.pools.available')
@@ -75,6 +75,7 @@ def config_changed():
                                     str(exc))
 
 
+@reactive.when_none('charm.paused', 'is-update-status-hook')
 @reactive.when('ceph-mds.connected')
 def storage_ceph_connected(ceph):
     ceph_mds = reactive.endpoint_from_flag('ceph-mds.connected')
