@@ -47,11 +47,15 @@ class TestRegisteredHooks(test_utils.TestRegisteredHooks):
             'when_none': {
                 'config_changed': (
                     'charm.paused',
-                    'run-default-update-status',
+                    'is-update-status-hook',
+                ),
+                'storage_ceph_connected': (
+                    'charm.paused',
+                    'is-update-status-hook',
                 ),
                 'cephfs_share_available': (
                     'charm.paused',
-                    'run-default-update-status',
+                    'is-update-status-hook',
                 ),
             },
         }
