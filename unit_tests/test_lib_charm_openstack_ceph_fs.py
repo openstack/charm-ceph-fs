@@ -32,7 +32,7 @@ class TestMitakaCephFsCharm(test_utils.PatchHelper):
         # Package list is the only difference between the past version and
         # future versions of this charm, see ``TestCephFsCharm`` for the rest
         # of the tests
-        self.assertEquals(self.target.packages, [
+        self.assertEqual(self.target.packages, [
             'ceph-mds', 'gdisk', 'btrfs-tools', 'xfsprogs'])
 
 
@@ -54,30 +54,30 @@ class TestCephFsCharm(test_utils.PatchHelper):
         setattr(self, attr, started)
 
     def test___init__(self):
-        self.assertEquals(self.target.services, [
+        self.assertEqual(self.target.services, [
             'ceph-mds@somehost'])
         self.assertDictEqual(self.target.restart_map, {
             '/etc/ceph/ceph.conf': ['ceph-mds@somehost']})
-        self.assertEquals(self.target.packages, [
+        self.assertEqual(self.target.packages, [
             'ceph-mds', 'gdisk', 'btrfs-progs', 'xfsprogs'])
 
     def test_configuration_class(self):
-        self.assertEquals(self.target.options.hostname, 'somehost')
-        self.assertEquals(self.target.options.mds_name, 'somehost')
+        self.assertEqual(self.target.options.hostname, 'somehost')
+        self.assertEqual(self.target.options.mds_name, 'somehost')
         self.patch_target('get_networks')
         self.get_networks.return_value = ['fakeaddress']
-        self.assertEquals(self.target.options.networks, ['fakeaddress'])
+        self.assertEqual(self.target.options.networks, ['fakeaddress'])
         self.patch_object(ceph_fs.ch_core.hookenv, 'config')
         self.config.side_effect = lambda x: {'prefer-ipv6': False}.get(x)
         self.patch_object(ceph_fs, 'get_ipv6_addr')
         self.get_ipv6_addr.return_value = ['2001:db8::fake']
         self.patch_target('get_public_addr')
         self.get_public_addr.return_value = '192.0.2.42'
-        self.assertEquals(
+        self.assertEqual(
             self.target.options.public_addr,
             '192.0.2.42')
         self.config.side_effect = lambda x: {'prefer-ipv6': True}.get(x)
-        self.assertEquals(
+        self.assertEqual(
             self.target.options.public_addr,
             '2001:db8::fake')
         self.patch_target('get_mds_cache')
@@ -85,7 +85,7 @@ class TestCephFsCharm(test_utils.PatchHelper):
             'mds-cache-memory-limit': '4Gi',
             'mds-cache-reservation': 0.05,
             'mds-health-cache-threshold': 1.5}
-        self.assertEquals(self.target.options.mds_cache, {
+        self.assertEqual(self.target.options.mds_cache, {
             'mds-cache-memory-limit': '4Gi',
             'mds-cache-reservation': 0.05,
             'mds-health-cache-threshold': 1.5})

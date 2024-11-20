@@ -8,3 +8,6 @@ __pycache__
 .stestr
 *.charm
 .vscode
+.project
+.pydevproject
+interfaces/*
